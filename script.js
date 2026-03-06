@@ -1,4 +1,7 @@
-const SYNC_SERVER = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+const SYNC_SERVER = window.location.hostname === 'localhost' || 
+                   window.location.hostname === '127.0.0.1' || 
+                   window.location.hostname === '' || 
+                   window.location.protocol === 'file:'
     ? 'http://localhost:5000' 
     : 'https://hisab-expense-tracker-backend.onrender.com'; // Placeholder for production URL
 
