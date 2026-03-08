@@ -14,6 +14,15 @@ const DatabaseManager = {
     init: async function() {
         return new Promise((resolve, reject) => {
             const request = indexedDB.open(this.dbName, this.version);
+            request.onupgradeneeded = (event) => {
+                const db = event.target.result;
+                if (!db.objectStoreNames.contains('transactions')) {
+                    db.createObjectStore('transactions', { keyPath: 'docId' });
+                }
+                if (!db.objectStoreNames.contains('emis')) {
+                    db.createObjectStore('emis', { keyPath: 'docId' });
+                }
+            };
             request.onsuccess = (event) => {
                 this.db = event.target.result;
                 resolve();
