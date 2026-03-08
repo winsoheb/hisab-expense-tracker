@@ -451,8 +451,8 @@ async function renderUserDashboard() {
     userNameEl.innerText = `Hi, ${currentUser.name.split(' ')[0]}`;
 
     // Get strictly this user's data
-    currentTransactions = await DatabaseManager.getTransactions(currentUser.id);
-    currentEMIs = await DatabaseManager.getEMIs(currentUser.id);
+    currentTransactions = await DatabaseManager.getTransactions((currentUser._id || currentUser.id));
+    currentEMIs = await DatabaseManager.getEMIs((currentUser._id || currentUser.id));
     
     // Sort oldest to newest for visual append
     currentTransactions.sort((a,b) => new Date(a.date) - new Date(b.date));
@@ -487,7 +487,7 @@ async function handleAddTransaction(e) {
     }
 
     const tx = await DatabaseManager.addTransaction({
-        userId: currentUser.id,
+        userId: (currentUser._id || currentUser.id),
         type,
         name,
         amount: parseFloat(amountStr),
@@ -804,7 +804,7 @@ if(emiForm) {
 
         const totalAmount = monthlyEmi * tenure;
         const emiData = {
-            userId: currentUser.id,
+            userId: (currentUser._id || currentUser.id),
             label: name,
             principal,
             interestRate: parseFloat(rate.toFixed(2)),
@@ -997,8 +997,8 @@ async function renderDatabaseStats() {
     if (!currentUser) return;
     try {
         const isAdmin = currentUser.role === 'admin';
-        const allTx = await DatabaseManager.getTransactions(isAdmin ? null : currentUser.id);
-        const allEmis = await DatabaseManager.getEMIs(isAdmin ? null : currentUser.id);
+        const allTx = await DatabaseManager.getTransactions(isAdmin ? null : (currentUser._id || currentUser.id));
+        const allEmis = await DatabaseManager.getEMIs(isAdmin ? null : (currentUser._id || currentUser.id));
         document.getElementById('stat-transactions-count').innerText = allTx.length;
         document.getElementById('stat-emis-count').innerText = allEmis.length;
         
@@ -1041,7 +1041,7 @@ document.getElementById('btn-sync-cloud')?.addEventListener('click', async () =>
     status.style.color = 'var(--accent-primary)';
 
     try {
-        await DatabaseManager.syncToCloud(currentUser.id);
+        await DatabaseManager.syncToCloud((currentUser._id || currentUser.id));
         status.innerText = 'Sync complete! All data is now in the cloud.';
         status.style.color = '#10b981';
         await renderDatabaseStats();
@@ -1156,10 +1156,10 @@ async function renderExplorer() {
     let headers = [];
 
     if (explorerTab === 'transactions') {
-        data = await DatabaseManager.getTransactions(isAdmin ? null : currentUser.id);
+        data = await DatabaseManager.getTransactions(isAdmin ? null : (currentUser._id || currentUser.id));
         headers = ['Name', 'Amount', 'Type', 'Mode', 'Date', 'Actions'];
     } else if (explorerTab === 'emis') {
-        data = await DatabaseManager.getEMIs(isAdmin ? null : currentUser.id);
+        data = await DatabaseManager.getEMIs(isAdmin ? null : (currentUser._id || currentUser.id));
         headers = ['Label', 'Principal', 'Rate', 'Tenure', 'Actions'];
     } else if (explorerTab === 'users' && isAdmin) {
         data = await DatabaseManager.getUsers();
