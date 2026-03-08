@@ -3,7 +3,7 @@ const SYNC_SERVER = window.location.hostname === 'localhost' ||
                    window.location.hostname === '' || 
                    window.location.protocol === 'file:'
     ? 'http://localhost:5000' 
-    : 'https://hisab-expense-tracker-backend.onrender.com';
+    : 'https://hisab-soheb-in.onrender.com';
 
 // DatabaseManager: Redirects calls to Backend API (MongoDB) with IndexedDB as a local buffer
 const DatabaseManager = {
