@@ -20,9 +20,16 @@ app.use('/api/transactions', require('./routes/transactions'));
 app.use('/api/emis', require('./routes/emis'));
 
 // MongoDB Connection
-mongoose.connect(process.env.MONGODB_URI)
-    .then(() => console.log('MongoDB connected successfully'))
-    .catch(err => console.error('MongoDB connection error:', err));
+console.log('Checking MongoDB URI... exists:', !!process.env.MONGODB_URI);
+
+mongoose.connect(process.env.MONGODB_URI, {
+    serverSelectionTimeoutMS: 5000 // Timeout early if can't connect
+})
+    .then(() => console.log('✅ MongoDB connected successfully to Atlas!'))
+    .catch(err => {
+        console.error('❌ MongoDB connection error on startup:');
+        console.error(err.message);
+    });
 
 // Basic Route
 app.get('/', (req, res) => {
