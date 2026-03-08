@@ -20,10 +20,16 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
+        console.log(`Login attempt for: ${email}`);
         const user = await User.findOne({ email, password });
-        if (!user) return res.status(400).json({ message: "Invalid credentials" });
+        if (!user) {
+            console.log(`Invalid login for: ${email}`);
+            return res.status(400).json({ message: "Invalid credentials" });
+        }
+        console.log(`Login successful for: ${email}`);
         res.json(user);
     } catch (err) {
+        console.error(`Login error: ${err.message}`);
         res.status(500).json({ message: err.message });
     }
 });

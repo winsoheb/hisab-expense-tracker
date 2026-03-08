@@ -8,8 +8,8 @@ const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors({
-    origin: ['http://localhost:5000', 'hisab.soheb.in', 'https://hisab.soheb.in'], 
-    methods: ['GET', 'POST', 'PATCH', 'DELETE'],
+    origin: ['https://hisab.soheb.in', 'http://localhost:5000', 'http://127.0.0.1:5000'],
+    methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json());

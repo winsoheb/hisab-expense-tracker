@@ -3,7 +3,7 @@ const SYNC_SERVER = window.location.hostname === 'localhost' ||
                    window.location.hostname === '' || 
                    window.location.protocol === 'file:'
     ? 'http://localhost:5000' 
-    : 'https://hisab-expense-tracker-backend.onrender.com'; // Placeholder for production URL
+    : 'https://hisab-expense-tracker-backend.onrender.com';
 
 // DatabaseManager: Redirects calls to Backend API (MongoDB) with IndexedDB as a local buffer
 const DatabaseManager = {
@@ -37,6 +37,12 @@ const DatabaseManager = {
             return data;
         } catch (err) {
             console.error("Fetch Error:", err);
+            const fullUrl = `${SYNC_SERVER}${endpoint}`;
+            if (err.message === 'Failed to fetch') {
+                alert(`Connection Error: Could not reach the server at ${fullUrl}.\n\nEnsure your backend is running at this URL and you have allowed CORS access.`);
+            } else {
+                alert("Error: " + err.message + ` (URL: ${fullUrl})`);
+            }
             throw err;
         }
     },
