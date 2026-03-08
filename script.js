@@ -24,6 +24,14 @@ const DatabaseManager = {
 
     // API Core
     apiFetch: async function(endpoint, options = {}) {
+        let loadingTimer = setTimeout(() => {
+            const toast = document.createElement('div');
+            toast.id = 'render-warming-toast';
+            toast.style = 'position:fixed; bottom:20px; right:20px; background:#6366f1; color:white; padding:12px 20px; border-radius:8px; z-index:10000; box-shadow:0 4px 12px rgba(0,0,0,0.3); font-family:sans-serif; transition: all 0.3s ease;';
+            toast.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Warming up backend server... Please wait (Render Free Tier)';
+            document.body.appendChild(toast);
+        }, 1500); // Show after 1.5s delay
+
         try {
             const response = await fetch(`${SYNC_SERVER}${endpoint}`, {
                 ...options,
@@ -32,14 +40,22 @@ const DatabaseManager = {
                     ...options.headers
                 }
             });
+            clearTimeout(loadingTimer);
+            const toast = document.getElementById('render-warming-toast');
+            if(toast) toast.remove();
+
             const data = await response.json();
             if (!response.ok) throw new Error(data.message || 'API Error');
             return data;
         } catch (err) {
+            clearTimeout(loadingTimer);
+            const toast = document.getElementById('render-warming-toast');
+            if(toast) toast.remove();
+
             console.error("Fetch Error:", err);
             const fullUrl = `${SYNC_SERVER}${endpoint}`;
             if (err.message === 'Failed to fetch') {
-                alert(`Connection Error: Could not reach the server at ${fullUrl}.\n\nEnsure your backend is running at this URL and you have allowed CORS access.`);
+                alert(`Connection Error: Could not reach the server at ${fullUrl}.\n\nNote: If the server hasn't been used recently, it may take 50+ seconds to "wake up" (Render Free Tier).`);
             } else {
                 alert("Error: " + err.message + ` (URL: ${fullUrl})`);
             }
