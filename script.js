@@ -230,6 +230,44 @@ const overviewExpenseEl = document.getElementById('overview-expense');
 const overviewEmiEl = document.getElementById('overview-emi-deductions');
 const overviewBorrowedEl = document.getElementById('overview-borrowed');
 
+// Theme Toggle
+const themeToggleBtn = document.getElementById('theme-toggle');
+const adminThemeToggleBtn = document.getElementById('admin-theme-toggle');
+
+function applyTheme(theme) {
+    if (theme === 'light') {
+        document.body.classList.add('light-theme');
+        if(themeToggleBtn) themeToggleBtn.innerHTML = '<i class="fa-solid fa-sun"></i>';
+        if(adminThemeToggleBtn) adminThemeToggleBtn.innerHTML = '<i class="fa-solid fa-sun"></i>';
+    } else {
+        document.body.classList.remove('light-theme');
+        if(themeToggleBtn) themeToggleBtn.innerHTML = '<i class="fa-solid fa-moon"></i>';
+        if(adminThemeToggleBtn) adminThemeToggleBtn.innerHTML = '<i class="fa-solid fa-moon"></i>';
+    }
+    
+    // Re-render charts to update their typography colors
+    if(Chart.instances.length > 0) {
+        Chart.defaults.color = getComputedStyle(document.body).getPropertyValue('--chart-text-color').trim();
+        for(let id in Chart.instances) {
+            Chart.instances[id].update();
+        }
+    }
+}
+
+function toggleTheme() {
+    const isLight = document.body.classList.contains('light-theme');
+    const newTheme = isLight ? 'dark' : 'light';
+    localStorage.setItem('hisab_theme', newTheme);
+    applyTheme(newTheme);
+}
+
+themeToggleBtn?.addEventListener('click', toggleTheme);
+adminThemeToggleBtn?.addEventListener('click', toggleTheme);
+
+// Initialize Theme
+const savedTheme = localStorage.getItem('hisab_theme') || 'dark';
+applyTheme(savedTheme);
+
 // Quick Actions
 document.getElementById('qa-add-income')?.addEventListener('click', () => switchTab('transactions', 'income'));
 document.getElementById('qa-add-expense')?.addEventListener('click', () => switchTab('transactions', 'expense'));
@@ -657,7 +695,7 @@ function updateChart(income, expense, investment, emiDeductions = 0, borrowed = 
     if (chartInstance) chartInstance.destroy();
     if (!window.Chart) return;
     
-    Chart.defaults.color = '#94a3b8';
+    Chart.defaults.color = getComputedStyle(document.body).getPropertyValue('--chart-text-color').trim();
     Chart.defaults.font.family = "'Outfit', sans-serif";
 
     if (income === 0 && expense === 0 && investment === 0 && emiDeductions === 0 && borrowed === 0) return; 

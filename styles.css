@@ -18,6 +18,38 @@
     
     --radius: 16px;
     --transition: 0.3s ease;
+
+    /* Theme-specific Overrides */
+    --chart-text-color: #94a3b8;
+    --input-bg-color: rgba(0, 0, 0, 0.2);
+    --input-focus-ring: rgba(99, 102, 241, 0.2);
+    --header-gradient: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+    --bg-gradient-1: rgba(99, 102, 241, 0.15);
+    --bg-gradient-2: rgba(16, 185, 129, 0.1);
+}
+
+body.light-theme {
+    --bg-color: #f8fafc;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+
+    --card-bg: rgba(255, 255, 255, 0.8);
+    --card-border: rgba(148, 163, 184, 0.3);
+
+    --accent-primary: #4f46e5;
+    --accent-hover: #4338ca;
+
+    --color-income: #059669;
+    --color-expense: #dc2626;
+    --color-investment: #2563eb;
+
+    --shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.1);
+    
+    --chart-text-color: #475569;
+    --input-bg-color: #ffffff;
+    --header-gradient: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(255, 255, 255, 0.8) 100%);
+    --bg-gradient-1: rgba(99, 102, 241, 0.05);
+    --bg-gradient-2: rgba(16, 185, 129, 0.05);
 }
 
 * {
@@ -37,8 +69,9 @@ body {
     
     /* Subtle background gradient noise */
     background-image: 
-        radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.15), transparent 25%),
-        radial-gradient(circle at 85% 30%, rgba(16, 185, 129, 0.1), transparent 25%);
+        radial-gradient(circle at 15% 50%, var(--bg-gradient-1), transparent 25%),
+        radial-gradient(circle at 85% 30%, var(--bg-gradient-2), transparent 25%);
+    transition: background-color var(--transition), color var(--transition);
 }
 
 .dashboard {
@@ -71,7 +104,7 @@ h2 {
 .header {
     text-align: center;
     padding: 2rem;
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(255,255,255,0.05) 100%);
+    background: var(--header-gradient);
     position: relative;
     padding-top: 4.5rem;
 }
@@ -132,7 +165,7 @@ h2 {
 }
 
 .btn-secondary {
-    background: rgba(255,255,255,0.05);
+    background: var(--card-bg);
     color: var(--text-main);
     border: 1px solid var(--card-border);
     padding: 0.4rem 0.8rem;
@@ -142,7 +175,8 @@ h2 {
 }
 
 .btn-secondary:hover {
-    background: rgba(255,255,255,0.1);
+    border-color: var(--accent-primary);
+    color: var(--accent-primary);
 }
 
 .balance-container p {
@@ -157,10 +191,6 @@ h2 {
 .balance-container h1 {
     font-size: 3.5rem;
     font-weight: 700;
-    background: linear-gradient(90deg, #fff, #a5b4fc);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
 }
 
 /* Summary Cards */
@@ -179,7 +209,7 @@ h2 {
 
 .card:hover {
     transform: translateY(-5px);
-    border-color: rgba(255, 255, 255, 0.2);
+    border-color: var(--accent-primary);
 }
 
 .card-icon {
@@ -217,7 +247,7 @@ h2 {
 }
 
 .btn-action {
-    background: rgba(255,255,255,0.05);
+    background: var(--card-bg);
     border: 1px solid var(--card-border);
     color: var(--text-main);
     padding: 1rem;
@@ -233,15 +263,14 @@ h2 {
 }
 
 .btn-action:hover {
-    background: rgba(255,255,255,0.1);
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
 }
 
-.income-btn:hover { color: var(--color-income); border-color: rgba(16, 185, 129, 0.5); }
-.expense-btn:hover { color: var(--color-expense); border-color: rgba(239, 68, 68, 0.5); }
-.report-btn:hover { color: var(--text-main); border-color: rgba(255, 255, 255, 0.5); }
-.emi-btn:hover { color: #f59e0b; border-color: rgba(245, 158, 11, 0.5); }
+.income-btn:hover { color: var(--color-income); border-color: var(--color-income); }
+.expense-btn:hover { color: var(--color-expense); border-color: var(--color-expense); }
+.report-btn:hover { color: var(--text-main); border-color: var(--text-muted); }
+.emi-btn:hover { color: #f59e0b; border-color: #f59e0b; }
 
 /* Main Content Grid */
 .main-content {
@@ -273,7 +302,7 @@ h2 {
 .form-group select {
     width: 100%;
     padding: 0.8rem 1rem;
-    background: rgba(0,0,0,0.2);
+    background: var(--input-bg-color);
     border: 1px solid var(--card-border);
     border-radius: 8px;
     color: var(--text-main);
@@ -285,7 +314,7 @@ h2 {
 .form-group input:focus, 
 .form-group select:focus {
     border-color: var(--accent-primary);
-    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+    box-shadow: 0 0 0 2px var(--input-focus-ring);
 }
 
 .btn-primary {
@@ -426,15 +455,15 @@ progress::-moz-progress-bar {
     justify-content: space-between;
     align-items: center;
     padding: 1rem;
-    background: rgba(255,255,255,0.03);
+    background: var(--card-bg);
     border-radius: 12px;
     border: 1px solid transparent;
     transition: var(--transition);
 }
 
 .transaction-item:hover {
-    background: rgba(255,255,255,0.06);
-    border-color: var(--card-border);
+    border-color: var(--accent-primary);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .transaction-item.income-edge { border-left: 4px solid var(--color-income); }
@@ -607,7 +636,7 @@ table th {
 }
 
 table tr:hover {
-    background: rgba(255,255,255,0.02);
+    background: var(--card-bg);
 }
 
 .badge-admin {
@@ -638,7 +667,7 @@ table tr:hover {
 
 .danger-zone {
     border: 1px solid rgba(239, 68, 68, 0.3);
-    background: rgba(239, 68, 68, 0.05);
+    background: var(--card-bg);
 }
 
 .explorer-tabs {
@@ -662,10 +691,11 @@ table tr:hover {
 }
 
 .stat-item {
-    background: rgba(255,255,255,0.03);
+    background: var(--card-bg);
     padding: 1rem;
     border-radius: 12px;
     text-align: center;
+    border: 1px solid var(--card-border);
 }
 
 .stat-value {

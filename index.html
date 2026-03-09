@@ -23,8 +23,11 @@
         <header class="header card-glass">
             <div class="user-controls">
                 <span id="user-name">Welcome</span>
-                <button id="logout-btn" class="btn-secondary"><i class="fa-solid fa-right-from-bracket"></i>
-                    Logout</button>
+                <div style="display:flex; gap:0.5rem;">
+                    <button id="theme-toggle" class="btn-secondary" title="Toggle Theme"><i class="fa-solid fa-moon"></i></button>
+                    <button id="logout-btn" class="btn-secondary"><i class="fa-solid fa-right-from-bracket"></i>
+                        Logout</button>
+                </div>
             </div>
 
             <!-- App Navigation -->
@@ -399,8 +402,11 @@
         <header class="header card-glass admin-header">
             <div class="user-controls">
                 <span>Admin Portal</span>
-                <button id="admin-logout-btn" class="btn-secondary"><i class="fa-solid fa-right-from-bracket"></i>
-                    Logout</button>
+                <div style="display:flex; gap:0.5rem;">
+                    <button id="admin-theme-toggle" class="btn-secondary" title="Toggle Theme"><i class="fa-solid fa-moon"></i></button>
+                    <button id="admin-logout-btn" class="btn-secondary"><i class="fa-solid fa-right-from-bracket"></i>
+                        Logout</button>
+                </div>
             </div>
             <div class="balance-container">
                 <p>System-wide Transaction Volume</p>
