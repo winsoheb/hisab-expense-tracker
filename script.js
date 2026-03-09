@@ -262,7 +262,7 @@ let reportChartInstance = null;
 // ----------------------------------------------------
 
 // Tab switching
-tabLogin.addEventListener('click', () => {
+tabLogin?.addEventListener('click', () => {
     tabLogin.classList.add('active');
     tabRegister.classList.remove('active');
     loginForm.style.display = 'block';
@@ -270,7 +270,7 @@ tabLogin.addEventListener('click', () => {
     authError.style.display = 'none';
 });
 
-tabRegister.addEventListener('click', () => {
+tabRegister?.addEventListener('click', () => {
     tabRegister.classList.add('active');
     tabLogin.classList.remove('active');
     registerForm.style.display = 'block';
@@ -283,7 +283,7 @@ function showError(msg) {
     authError.style.display = 'block';
 }
 
-loginForm.addEventListener('submit', async (e) => {
+loginForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const email = document.getElementById('login-email').value;
     const pass = document.getElementById('login-password').value;
@@ -296,7 +296,7 @@ loginForm.addEventListener('submit', async (e) => {
     }
 });
 
-registerForm.addEventListener('submit', async (e) => {
+registerForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const name = document.getElementById('reg-name').value;
     const email = document.getElementById('reg-email').value;
@@ -329,8 +329,8 @@ function logout() {
     localStorage.removeItem('loggedInUser');
 }
 
-logoutBtn.addEventListener('click', logout);
-adminLogoutBtn.addEventListener('click', logout);
+logoutBtn?.addEventListener('click', logout);
+adminLogoutBtn?.addEventListener('click', logout);
 
 async function loginUser(user) {
     currentUser = user;
@@ -743,11 +743,11 @@ function switchTab(tabId, subType = null) {
     }
 }
 
-navOverview.addEventListener('click', () => switchTab('overview'));
-navTransactions.addEventListener('click', () => switchTab('transactions'));
-navReports.addEventListener('click', () => switchTab('reports'));
-navEmis.addEventListener('click', () => switchTab('emis'));
-navDatabase.addEventListener('click', () => switchTab('database'));
+navOverview?.addEventListener('click', () => switchTab('overview'));
+navTransactions?.addEventListener('click', () => switchTab('transactions'));
+navReports?.addEventListener('click', () => switchTab('reports'));
+navEmis?.addEventListener('click', () => switchTab('emis'));
+navDatabase?.addEventListener('click', () => switchTab('database'));
 
 
 // ----------------------------------------------------
@@ -1217,7 +1217,7 @@ window.deleteExplorerItem = deleteExplorerItem;
 // REPORTS DASHBOARD LOGIC
 // ----------------------------------------------------
 
-dateRangeSelect.addEventListener('change', (e) => {
+dateRangeSelect?.addEventListener('change', (e) => {
     if (e.target.value === 'custom') {
         customDateInputs.style.display = 'flex';
     } else {
@@ -1226,9 +1226,9 @@ dateRangeSelect.addEventListener('change', (e) => {
     }
 });
 
-startDateInput.addEventListener('change', renderReports);
-endDateInput.addEventListener('change', renderReports);
-filterTypeSelect.addEventListener('change', renderReports);
+startDateInput?.addEventListener('change', renderReports);
+endDateInput?.addEventListener('change', renderReports);
+filterTypeSelect?.addEventListener('change', renderReports);
 
 function getFilteredTransactions() {
     if (!currentUser) return [];

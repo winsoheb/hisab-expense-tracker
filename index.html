@@ -198,8 +198,62 @@
         </div>
 
         <!-- Reports View -->
-        <div class="reports-content" id="reports-view" style="display: none;">
-            <!-- ... existing code ... -->
+        <div class="reports-content" id="reports-view" style="display: none; padding: 2rem;">
+            <div class="grid-2">
+                <!-- Left: Filters & Chart -->
+                <div class="left-col">
+                    <section class="card-glass mb-2">
+                        <h2>Report Filters</h2>
+                        <div class="form-group row-flex">
+                            <label for="date-range" style="white-space:nowrap; margin-right: 1rem;">Date Range:</label>
+                            <select id="date-range" class="w-full">
+                                <option value="all">All Time</option>
+                                <option value="7days">Last 7 Days</option>
+                                <option value="month" selected>Last 30 Days</option>
+                                <option value="custom">Custom Range</option>
+                            </select>
+                        </div>
+                        
+                        <div id="custom-date-inputs" class="grid-2 gap-2 mt-1" style="display: none;">
+                            <div class="form-group">
+                                <label for="start-date">Start</label>
+                                <input type="date" id="start-date">
+                            </div>
+                            <div class="form-group">
+                                <label for="end-date">End</label>
+                                <input type="date" id="end-date">
+                            </div>
+                        </div>
+
+                        <div class="form-group row-flex mt-1">
+                            <label for="filter-type" style="white-space:nowrap; margin-right: 1rem;">Transaction Type:</label>
+                            <select id="filter-type" class="w-full">
+                                <option value="all">All</option>
+                                <option value="income">Income Only</option>
+                                <option value="expense">Expense Only</option>
+                                <option value="investment">Investment Only</option>
+                            </select>
+                        </div>
+                    </section>
+
+                    <section class="chart-container card-glass">
+                        <h2>Report Overview</h2>
+                        <div class="chart-wrapper">
+                            <canvas id="reportChart"></canvas>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- Right: Filtered List -->
+                <div class="right-col">
+                    <section class="transaction-history card-glass">
+                        <h2>Filtered Transactions</h2>
+                        <div class="history-list" id="report-transaction-list">
+                            <div class="empty-state">Loading reports...</div>
+                        </div>
+                    </section>
+                </div>
+            </div>
         </div>
 
         <!-- Database View -->
