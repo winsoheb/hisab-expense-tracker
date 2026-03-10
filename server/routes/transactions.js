@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const Transaction = require('../models/Transaction');
+const { logActivity } = require('../utils/logger');
 
 // Get all for user
 router.get('/:userId', async (req, res) => {
@@ -28,6 +29,7 @@ router.post('/', async (req, res) => {
     try {
         const tx = new Transaction(req.body);
         await tx.save();
+        await logActivity(tx.userId, `Added Transaction: ${tx.name}`, req, `Amount: ${tx.amount}`);
         res.json(tx);
     } catch (err) {
         res.status(500).json({ message: err.message });
@@ -44,8 +46,11 @@ router.delete('/:id', async (req, res) => {
         }
 
         if (!tx) {
-            // Check if it's a docId (legacy/fallback)
-            await Transaction.findOneAndDelete({ docId: req.params.id });
+            tx = await Transaction.findOneAndDelete({ docId: req.params.id });
+        }
+
+        if (tx) {
+            await logActivity(tx.userId, `Deleted Transaction: ${tx.name}`, req);
         }
         res.json({ message: "Deleted" });
     } catch (err) {
@@ -64,6 +69,10 @@ router.patch('/:id', async (req, res) => {
 
         if (!tx) {
             tx = await Transaction.findOneAndUpdate({ docId: req.params.id }, req.body, { new: true });
+        }
+
+        if (tx) {
+            await logActivity(tx.userId, `Updated Transaction: ${tx.name}`, req);
         }
         res.json(tx);
     } catch (err) {

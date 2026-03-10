@@ -34,7 +34,7 @@
                 <button id="nav-transactions" class="nav-btn"><i class="fa-solid fa-money-bill-transfer"></i> Transactions</button>
                 <button id="nav-reports" class="nav-btn"><i class="fa-solid fa-chart-pie"></i> Reports</button>
                 <button id="nav-emis" class="nav-btn"><i class="fa-solid fa-hand-holding-dollar"></i> EMIs</button>
-                <button id="nav-database" class="nav-btn"><i class="fa-solid fa-database"></i> Database</button>
+                <button id="nav-emis" class="nav-btn"><i class="fa-solid fa-hand-holding-dollar"></i> EMIs</button>
             </nav>
 
             <div class="sidebar-footer">
@@ -280,95 +280,7 @@
             </div>
         </div>
 
-        <!-- Database View -->
-        <div class="main-content" id="database-view" style="display: none; padding: 2rem;">
-            <div class="grid-2">
-                <div class="left-col">
-                    <section class="card-solid">
-                        <h2><i class="fa-solid fa-file-export"></i> Backup & Restore</h2>
-                        <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.9rem;">
-                            Keep your data safe by exporting it to a file. You can restore your data anytime by uploading a previous backup.
-                        </p>
-                        
-                        <div style="display: flex; flex-direction: column; gap: 1rem;">
-                            <button id="btn-export-db" class="btn-primary" style="width: 100%;">
-                                <i class="fa-solid fa-download"></i> Export Data (JSON)
-                            </button>
-                            
-                            <hr style="border: 0; border-top: 1px solid var(--card-border); margin: 0.5rem 0;">
-                            
-                            <label for="import-db-file" style="font-size: 0.9rem; color: var(--text-muted);">Restore from Backup:</label>
-                            <input type="file" id="import-db-file" accept=".json" style="background: var(--card-bg); border: 1px solid var(--card-border); padding: 0.5rem; border-radius: 8px; color: var(--text-color); width: 100%;">
-                            <button id="btn-import-db" class="btn-secondary" style="width: 100%;">
-                                <i class="fa-solid fa-upload"></i> Import Data
-                            </button>
-                        </div>
-                    </section>
-                </div>
-                
-                <div class="right-col">
-                    <section class="card-solid">
-                        <h2><i class="fa-solid fa-circle-info"></i> Data Statistics</h2>
-                        <div id="database-stats" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
-                            <div class="stat-box" style="background: var(--card-bg); padding: 1rem; border-radius: 12px; border: 1px solid var(--card-border); text-align: center;">
-                                <div style="font-size: 0.8rem; color: var(--text-muted);">Transactions</div>
-                                <div id="stat-transactions-count" style="font-size: 1.5rem; font-weight: 700; color: #10b981;">0</div>
-                            </div>
-                            <div class="stat-box" style="background: var(--card-bg); padding: 1rem; border-radius: 12px; border: 1px solid var(--card-border); text-align: center;">
-                                <div style="font-size: 0.8rem; color: var(--text-muted);">Active EMIs</div>
-                                <div id="stat-emis-count" style="font-size: 1.5rem; font-weight: 700; color: #6366f1;">0</div>
-                            </div>
-                        </div>
-                    </section>
-                    
-                    <section class="card-solid" style="margin-top: 1.5rem; border: 1px solid var(--accent-primary);">
-                        <h2><i class="fa-solid fa-cloud-arrow-up"></i> Cloud Sync</h2>
-                        <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.9rem;">
-                            Synchronize your local data with the cloud. This will upload all local transactions and EMIs to your online account.
-                        </p>
-                        <button id="btn-sync-cloud" class="btn-primary" style="width: 100%; background: linear-gradient(135deg, #6366f1, #a855f7);">
-                            <i class="fa-solid fa-rotate"></i> Sync Local to Cloud
-                        </button>
-                        <div id="sync-status" style="margin-top: 1rem; font-size: 0.85rem; text-align: center; display: none; color: var(--accent-primary);"></div>
-                    </section>
-                    
-                    <section class="card-solid" style="margin-top: 1.5rem; border: 1px solid #ef444433;">
-                        <h2 style="color: #ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> Danger Zone</h2>
-                        <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.9rem;">
-                            Factory reset will permanently delete all your data, including transactions, EMIs, and user settings. This action cannot be undone.
-                        </p>
-                        <button id="btn-factory-reset" class="btn-secondary" style="width: 100%; border-color: #ef4444; color: #ef4444;">
-                            <i class="fa-solid fa-trash-can"></i> Factory Reset
-                        </button>
-                    </section>
-                </div>
-            </div>
 
-            <!-- Data Explorer Section -->
-            <section class="card-solid mt-2">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                    <h2><i class="fa-solid fa-magnifying-glass"></i> Data Explorer</h2>
-                    <div class="explorer-tabs" style="display: flex; gap: 0.5rem;">
-                        <button class="nav-btn active" onclick="switchExplorerTab('transactions')">Transactions</button>
-                        <button class="nav-btn" onclick="switchExplorerTab('emis')">EMIs</button>
-                        <button class="nav-btn" id="explorer-users-btn" onclick="switchExplorerTab('users')">Users</button>
-                    </div>
-                </div>
-                
-                <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
-                    <table id="explorer-table" class="admin-users-table">
-                        <thead>
-                            <tr id="explorer-thead">
-                                <!-- Dynamic Headers -->
-                            </tr>
-                        </thead>
-                        <tbody id="explorer-tbody">
-                            <!-- Dynamic Content -->
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-        </div>
         </div>
         </div>
     </div>
@@ -414,6 +326,10 @@
                     <label for="reg-password">Password</label>
                     <input type="password" id="reg-password" required>
                 </div>
+                <div class="form-group text-left">
+                    <label for="reg-admin-key">Admin Key (Optional)</label>
+                    <input type="password" id="reg-admin-key" placeholder="Enter key for admin access">
+                </div>
                 <button type="submit" class="btn-primary">Create Account</button>
             </form>
 
@@ -443,55 +359,97 @@
 
             <p id="auth-error" class="error-msg"></p>
         </div>
-    </div>
-
     <!-- Admin Dashboard (Hidden by Default) -->
     <div class="dashboard" id="admin-dashboard" style="display: none;">
         <aside class="sidebar card-solid">
             <div class="sidebar-header">
                 <span style="font-size: 1.25rem; font-weight: 700; color: var(--text-main);"><img src="./logo.png" alt="Hisab Logo" style="width: 28px; vertical-align: middle; margin-right: 12px; border-radius: 6px;"> Admin Portal</span>
             </div>
+            
+            <nav class="app-nav">
+                <button class="nav-btn active"><i class="fa-solid fa-gauge-high"></i> Management</button>
+            </nav>
 
             <div class="sidebar-footer" style="margin-top: auto;">
                 <button id="admin-theme-toggle" class="btn-secondary" title="Toggle Theme"><i class="fa-solid fa-moon"></i></button>
                 <button id="admin-logout-btn" class="btn-secondary"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
             </div>
         </aside>
+        
         <div class="main-wrapper">
             <header class="top-bar">
-                <div class="top-bar-title">Admin Controls</div>
-                <div class="balance-container">
-                    <p>System-wide Transaction Volume</p>
-                    <h1 id="admin-total-volume">₹0.00</h1>
+                <div class="top-bar-title">Admin Dashboard</div>
+                <div class="top-bar-actions" style="display: flex; gap: 1rem; align-items: center;">
+                    <div class="balance-container" style="text-align: right;">
+                        <p>Global System Volume</p>
+                        <h1 id="admin-total-volume">₹0.00</h1>
+                    </div>
                 </div>
             </header>
 
-        <section class="admin-panels">
-            <div class="admin-panel card-solid">
-                <h2>System Users</h2>
-                <div class="table-responsive">
-                    <table id="admin-users-table">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Role</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody><!-- Injected via JS --></tbody>
-                    </table>
+            <!-- Admin Stats Summary -->
+            <section class="summary-cards">
+                <div class="card card-solid investment">
+                    <div class="card-icon"><i class="fa-solid fa-users"></i></div>
+                    <div class="card-info">
+                        <h3>Total Users</h3>
+                        <p id="admin-stats-users">0</p>
+                    </div>
+                </div>
+                <div class="card card-solid income">
+                    <div class="card-icon"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+                    <div class="card-info">
+                        <h3>Global Transactions</h3>
+                        <p id="admin-stats-transactions">0</p>
+                    </div>
+                </div>
+            </section>
+
+            <div class="grid-2 mt-2">
+                <!-- User Management -->
+                <div class="left-col" style="flex: 2;">
+                    <section class="admin-panel card-solid">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                            <h2><i class="fa-solid fa-users-gear"></i> System Users</h2>
+                        </div>
+                        <div class="table-responsive">
+                            <table id="admin-users-table" class="admin-users-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Role</th>
+                                        <th>Status</th>
+                                        <th>Last Login</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody><!-- Injected via JS --></tbody>
+                            </table>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- Activity Logs -->
+                <div class="right-col" style="flex: 1;">
+                    <section class="admin-panel card-solid">
+                        <h2><i class="fa-solid fa-clock-rotate-left"></i> Recent Activity</h2>
+                        <div id="admin-activity-list" class="activity-log-container">
+                            <!-- Injected via JS -->
+                        </div>
+                    </section>
                 </div>
             </div>
 
-            <div class="admin-panel card-solid">
-                <h2>Global Recent Transactions</h2>
+            <section class="admin-panel card-solid mt-2">
+                <h2><i class="fa-solid fa-globe"></i> All Transactions</h2>
                 <div class="history-list" id="admin-tx-list">
                     <!-- Injected via JS -->
                 </div>
-            </div>
-        </section>
+            </section>
         </div>
+    </div>
     </div>
 
     <!-- Chart.js -->

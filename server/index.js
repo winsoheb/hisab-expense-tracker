@@ -18,6 +18,7 @@ app.use(express.json());
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/transactions', require('./routes/transactions'));
 app.use('/api/emis', require('./routes/emis'));
+app.use('/api/admin', require('./routes/admin'));
 
 // MongoDB Connection
 console.log('Checking MongoDB URI... exists:', !!process.env.MONGODB_URI);

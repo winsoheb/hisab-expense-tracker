@@ -88,11 +88,34 @@ const DatabaseManager = {
         return this.apiFetch(`/api/auth/users/${id}`, { method: 'DELETE' });
     },
 
+    updateUser: async function(id, data) {
+        return this.apiFetch(`/api/auth/users/${id}`, {
+            method: 'PATCH',
+            body: JSON.stringify(data)
+        });
+    },
+
     authenticate: async function(email, password) {
         return this.apiFetch('/api/auth/login', {
             method: 'POST',
             body: JSON.stringify({ email, password })
         });
+    },
+
+    logout: async function(userId) {
+        return this.apiFetch('/api/auth/logout', {
+            method: 'POST',
+            body: JSON.stringify({ userId })
+        });
+    },
+
+    // Admin Specific
+    getAdminStats: async function() {
+        return this.apiFetch('/api/admin/stats');
+    },
+
+    getActivityLogs: async function() {
+        return this.apiFetch('/api/admin/activity');
     },
 
     // Transactions
@@ -210,9 +233,6 @@ const navOverview = document.getElementById('nav-overview');
 const navTransactions = document.getElementById('nav-transactions');
 const navReports = document.getElementById('nav-reports');
 const navEmis = document.getElementById('nav-emis');
-const navDatabase = document.getElementById('nav-database');
-
-const databaseView = document.getElementById('database-view');
 
 const tabLogin = document.getElementById('tab-login');
 const tabRegister = document.getElementById('tab-register');
@@ -354,6 +374,7 @@ registerForm?.addEventListener('submit', async (e) => {
     const name = document.getElementById('reg-name').value;
     const email = document.getElementById('reg-email').value;
     const pass = document.getElementById('reg-password').value;
+    const adminKey = document.getElementById('reg-admin-key').value;
 
     // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -367,36 +388,51 @@ registerForm?.addEventListener('submit', async (e) => {
     }
 
     try {
-        const newUser = await DatabaseManager.addUser({ name, email, password: pass });
+        const newUser = await DatabaseManager.addUser({ name, email, password: pass, adminKey });
         await loginUser(newUser);
     } catch (err) {
         showError(err.message);
     }
 });
 
-function logout() {
+async function performLogout() {
+    if (currentUser) {
+        try {
+            await DatabaseManager.logout(currentUser._id || currentUser.id);
+        } catch (e) {
+            console.warn("Logout log failed:", e);
+        }
+    }
+    
     currentUser = null;
     currentTransactions = [];
     currentEMIs = [];
+    
     loginOverlay.style.display = 'flex';
     appDashboard.style.display = 'none';
-    overviewView.style.display = 'none';
-    transactionsView.style.display = 'none';
     adminDashboard.style.display = 'none';
-    reportsView.style.display = 'none';
-    emisView.style.display = 'none';
+    
+    [overviewView, transactionsView, reportsView, emisView].forEach(v => {
+        if(v) v.style.display = 'none';
+    });
     
     document.getElementById('login-password').value = '';
     document.getElementById('reg-password').value = '';
     
     // Clear Session permanently
     localStorage.removeItem('loggedInUser');
+    
+    // Redirect if on standalone admin page
+    if (window.location.pathname.includes('admin-dashboard.html')) {
+        window.location.href = 'index.html';
+    }
 }
 
-logoutBtn?.addEventListener('click', logout);
-adminLogoutBtn?.addEventListener('click', logout);
-const mobileLogoutBtn = document.getElementById('mobile-logout-btn');
-if (mobileLogoutBtn) mobileLogoutBtn.addEventListener('click', logout);
+logoutBtn?.addEventListener('click', performLogout);
+adminLogoutBtn?.addEventListener('click', performLogout);
+if (document.getElementById('mobile-logout-btn')) {
+    document.getElementById('mobile-logout-btn').addEventListener('click', performLogout);
+}
 
 async function loginUser(user) {
     currentUser = user;
@@ -492,73 +528,141 @@ async function renderAdminDashboard() {
     adminDashboard.style.display = 'flex';
     appDashboard.style.display = 'none';
 
-    // 1. Render Users Table
-    const users = await DatabaseManager.getUsers();
-    const tbody = document.querySelector('#admin-users-table tbody');
-    tbody.innerHTML = '';
-    
-    users.forEach(u => {
-        const tr = document.createElement('tr');
-        const badge = u.role === 'admin' ? '<span class="badge-admin">Admin</span>' : '<span class="badge-user">User</span>';
-        const deleteBtn = (u.role !== 'admin') ? `<button class="delete-btn" onclick="deleteExplorerItem('users', '${u._id || u.id}')"><i class="fa-solid fa-trash"></i></button>` : '-';
-        tr.innerHTML = `
-            <td>${u.name}</td>
-            <td>${u.email}</td>
-            <td>${badge}</td>
-            <td>${deleteBtn}</td>
-        `;
-        tbody.appendChild(tr);
-    });
+    try {
+        // 1. Load System Statistics
+        const stats = await DatabaseManager.getAdminStats();
+        document.getElementById('admin-total-volume').innerText = formatMoney(stats.totalVolume);
+        
+        // Populate additional stats if they exist in HTML
+        const totalUsersEl = document.getElementById('admin-stats-users');
+        if(totalUsersEl) totalUsersEl.innerText = stats.totalUsers;
+        const totalTxEl = document.getElementById('admin-stats-transactions');
+        if(totalTxEl) totalTxEl.innerText = stats.totalTransactions;
 
-    // 2. Render Global Transactions
-    const allTx = await DatabaseManager.getTransactions();
-    // Sort descending by date
-    allTx.sort((a,b) => new Date(b.date) - new Date(a.date));
-    
-    const adminTxList = document.getElementById('admin-tx-list');
-    adminTxList.innerHTML = '';
-    let totalVolume = 0;
-
-    if (allTx.length === 0) {
-        adminTxList.innerHTML = '<div class="empty-state">No transactions system-wide.</div>';
-    } else {
-        allTx.forEach(tx => {
-            totalVolume += tx.amount;
+        // 2. Render Users Table
+        const users = await DatabaseManager.getUsers();
+        const tbody = document.querySelector('#admin-users-table tbody');
+        tbody.innerHTML = '';
+        
+        users.forEach(u => {
+            const tr = document.createElement('tr');
+            const roleBadge = u.role === 'admin' ? '<span class="badge badge-admin">Admin</span>' : '<span class="badge badge-user">User</span>';
+            const statusBadge = u.status === 'blocked' ? '<span class="badge badge-blocked">Blocked</span>' : '<span class="badge badge-active">Active</span>';
+            const lastLogin = u.lastLogin ? new Date(u.lastLogin).toLocaleString() : 'Never';
             
-            // Look up author name
-            const author = users.find(u => u.id === tx.userId);
-            const authorName = author ? author.name : 'Unknown User';
-
-            const item = document.createElement('div');
-            item.classList.add('transaction-item');
-            item.classList.add(`${tx.type}-edge`);
-
-            const sign = tx.type === 'expense' ? '-' : '+';
-            const dateStr = new Date(tx.date).toLocaleDateString();
-
-            item.innerHTML = `
-                <div class="item-info">
-                    <span class="item-name">${tx.name} <small style="color:var(--text-muted); font-size: 0.8em">by ${authorName} <b style="text-transform:uppercase">[${tx.mode || 'N/A'}]</b></small></span>
-                    <span class="item-date">${dateStr}</span>
-                </div>
-                <div class="item-right">
-                    <span class="item-amount ${tx.type}">${sign}${formatMoney(tx.amount)}</span>
+            const isSelf = u._id === currentUser._id;
+            const actionButtons = isSelf ? '<em>(Self)</em>' : `
+                <div class="admin-actions">
+                    <button class="btn-sm btn-outline" onclick="promoteUser('${u._id}')" title="Change Role"><i class="fa-solid fa-user-shield"></i></button>
+                    <button class="btn-sm btn-outline ${u.status === 'blocked' ? 'btn-success' : 'btn-warning'}" onclick="toggleUserStatus('${u._id}', '${u.status}')" title="${u.status === 'blocked' ? 'Unblock' : 'Block'}">
+                        <i class="fa-solid ${u.status === 'blocked' ? 'fa-user-check' : 'fa-user-slash'}"></i>
+                    </button>
+                    <button class="btn-sm btn-danger" onclick="deleteUserAdmin('${u._id}')" title="Delete User"><i class="fa-solid fa-trash"></i></button>
                 </div>
             `;
-            adminTxList.appendChild(item);
-        });
-    }
 
-    document.getElementById('admin-total-volume').innerText = formatMoney(totalVolume);
+            tr.innerHTML = `
+                <td><small>${u._id}</small></td>
+                <td><strong>${u.name}</strong></td>
+                <td>${u.email}</td>
+                <td>${roleBadge}</td>
+                <td>${statusBadge}</td>
+                <td><small>${lastLogin}</small></td>
+                <td>${actionButtons}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        // 3. Render Global Activity Logs
+        const logs = await DatabaseManager.getActivityLogs();
+        const logContainer = document.getElementById('admin-activity-list');
+        if (logContainer) {
+            logContainer.innerHTML = '';
+            if (logs.length === 0) {
+                logContainer.innerHTML = '<div class="empty-state">No activity logged yet.</div>';
+            } else {
+                logs.forEach(log => {
+                    const div = document.createElement('div');
+                    div.className = 'log-item';
+                    div.innerHTML = `
+                        <div class="log-info">
+                            <strong>${log.userName}</strong> ${log.action}
+                            <div class="log-meta">${new Date(log.timestamp).toLocaleString()} • IP: ${log.ipAddress || 'Unknown'}</div>
+                        </div>
+                    `;
+                    logContainer.appendChild(div);
+                });
+            }
+        }
+
+        // 4. Render Global Transactions
+        const allTx = await DatabaseManager.getTransactions();
+        allTx.sort((a,b) => new Date(b.date) - new Date(a.date));
+        
+        const adminTxList = document.getElementById('admin-tx-list');
+        adminTxList.innerHTML = '';
+
+        if (allTx.length === 0) {
+            adminTxList.innerHTML = '<div class="empty-state">No transactions system-wide.</div>';
+        } else {
+            allTx.forEach(tx => {
+                const author = users.find(u => (u._id === tx.userId || u.id === tx.userId));
+                const authorName = author ? author.name : 'Unknown User';
+
+                const item = document.createElement('div');
+                item.className = `transaction-item ${tx.type}-edge`;
+
+                const sign = tx.type === 'expense' ? '-' : '+';
+                const dateStr = new Date(tx.date).toLocaleDateString();
+
+                item.innerHTML = `
+                    <div class="item-info">
+                        <span class="item-name">${tx.name} <small style="color:var(--text-muted)">by ${authorName}</small></span>
+                        <span class="item-date">${dateStr}</span>
+                    </div>
+                    <div class="item-right">
+                        <span class="item-amount ${tx.type}">${sign}${formatMoney(tx.amount)}</span>
+                    </div>
+                `;
+                adminTxList.appendChild(item);
+            });
+        }
+    } catch (err) {
+        console.error("Admin Dashboard Error:", err);
+    }
 }
 
+// Admin Action Handlers
+async function promoteUser(userId) {
+    const newRole = confirm("Promote this user to Admin?") ? 'admin' : 'user';
+    await DatabaseManager.updateUser(userId, { role: newRole });
+    renderAdminDashboard();
+}
+
+async function toggleUserStatus(userId, currentStatus) {
+    const newStatus = currentStatus === 'blocked' ? 'active' : 'blocked';
+    await DatabaseManager.updateUser(userId, { status: newStatus });
+    renderAdminDashboard();
+}
+
+async function deleteUserAdmin(userId) {
+    if (confirm("Are you sure you want to PERMANENTLY delete this user and all their data?")) {
+        await DatabaseManager.deleteUser(userId);
+        renderAdminDashboard();
+    }
+}
+
+async function loadActivityLogs() {
+    const logs = await DatabaseManager.getActivityLogs();
+    // Implementation inside renderAdminDashboard
+}
 
 // ----------------------------------------------------
 // NORMAL USER DASHBOARD LOGIC
 // ----------------------------------------------------
 
 function formatMoney(amount) {
-    return '₹' + amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return '₹' + (amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 async function renderUserDashboard() {
