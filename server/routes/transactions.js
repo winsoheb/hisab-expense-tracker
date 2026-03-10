@@ -4,8 +4,23 @@ const mongoose = require('mongoose');
 const Transaction = require('../models/Transaction');
 const { logActivity } = require('../utils/logger');
 
+// Middleware to check if user owns the transaction or is admin
+const canAccessUser = (req, res, next) => {
+    const requesterId = req.headers['x-user-id'];
+    const requesterRole = req.headers['x-user-role'];
+    const targetUserId = req.params.userId;
+
+    if (!requesterId) return res.status(401).json({ message: "User ID required" });
+
+    if (requesterRole === 'admin' || requesterId === targetUserId) {
+        next();
+    } else {
+        res.status(403).json({ message: "Access denied. You can only access your own data." });
+    }
+};
+
 // Get all for user
-router.get('/:userId', async (req, res) => {
+router.get('/:userId', canAccessUser, async (req, res) => {
     try {
         const txs = await Transaction.find({ userId: req.params.userId });
         res.json(txs);
@@ -14,8 +29,10 @@ router.get('/:userId', async (req, res) => {
     }
 });
 
-// Admin: Get all
+// Admin: Get all (Protected in main index.js or via separate check)
 router.get('/', async (req, res) => {
+    const requesterRole = req.headers['x-user-role'];
+    if (requesterRole !== 'admin') return res.status(403).json({ message: "Admin access required" });
     try {
         const txs = await Transaction.find();
         res.json(txs);

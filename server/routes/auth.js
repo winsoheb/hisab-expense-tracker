@@ -3,18 +3,29 @@ const router = express.Router();
 const User = require('../models/User');
 const ActivityLog = require('../models/ActivityLog');
 const { logActivity } = require('../utils/logger');
+const rateLimit = require('express-rate-limit');
+
+// Rate limiting for auth routes
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 20, // Limit each IP to 20 requests per window
+    message: { message: "Too many attempts from this IP, please try again after 15 minutes" }
+});
 
 // Register
-router.post('/register', async (req, res) => {
+router.post('/register', authLimiter, async (req, res) => {
     try {
         const { name, email, password, adminKey } = req.body;
-        console.log(`Registration attempt for: ${email}`);
         
+        // Basic validation
+        if (!name || !email || !password) {
+            return res.status(400).json({ message: "All fields are required" });
+        }
+
         const exists = await User.findOne({ email });
         if (exists) return res.status(400).json({ message: "User already exists" });
 
         let role = 'user';
-        // Simple Admin Key check
         if (adminKey === 'ADMIN123') {
             role = 'admin';
         } else if (adminKey) {
@@ -25,21 +36,29 @@ router.post('/register', async (req, res) => {
         await user.save();
         
         await logActivity(user._id, 'User Registered', req);
-        res.status(210).json(user);
+        
+        // Don't send back the password (even hashed)
+        const userResponse = user.toObject();
+        delete userResponse.password;
+        
+        res.status(210).json(userResponse);
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
 });
 
 // Login
-router.post('/login', async (req, res) => {
+router.post('/login', authLimiter, async (req, res) => {
     try {
         const { email, password } = req.body;
-        console.log(`Login attempt for: ${email}`);
         
-        const user = await User.findOne({ email, password });
+        const user = await User.findOne({ email });
         if (!user) {
-            console.log(`Invalid login for: ${email}`);
+            return res.status(400).json({ message: "Invalid credentials" });
+        }
+
+        const isMatch = await user.comparePassword(password);
+        if (!isMatch) {
             return res.status(400).json({ message: "Invalid credentials" });
         }
 
@@ -51,11 +70,13 @@ router.post('/login', async (req, res) => {
         user.lastLogin = Date.now();
         await user.save();
 
-        console.log(`Login successful for: ${email}`);
         await logActivity(user._id, 'User Login', req);
-        res.json(user);
+        
+        const userResponse = user.toObject();
+        delete userResponse.password;
+        
+        res.json(userResponse);
     } catch (err) {
-        console.error(`Login error: ${err.message}`);
         res.status(500).json({ message: err.message });
     }
 });

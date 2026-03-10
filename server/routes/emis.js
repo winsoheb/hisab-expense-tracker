@@ -4,8 +4,23 @@ const mongoose = require('mongoose');
 const EMI = require('../models/EMI');
 const { logActivity } = require('../utils/logger');
 
+// Middleware to check if user owns the EMI or is admin
+const canAccessUser = (req, res, next) => {
+    const requesterId = req.headers['x-user-id'];
+    const requesterRole = req.headers['x-user-role'];
+    const targetUserId = req.params.userId;
+
+    if (!requesterId) return res.status(401).json({ message: "User ID required" });
+
+    if (requesterRole === 'admin' || requesterId === targetUserId) {
+        next();
+    } else {
+        res.status(403).json({ message: "Access denied. You can only access your own data." });
+    }
+};
+
 // Get all for user
-router.get('/:userId', async (req, res) => {
+router.get('/:userId', canAccessUser, async (req, res) => {
     try {
         const emis = await EMI.find({ userId: req.params.userId });
         res.json(emis);
@@ -16,6 +31,8 @@ router.get('/:userId', async (req, res) => {
 
 // Admin: Get all
 router.get('/', async (req, res) => {
+    const requesterRole = req.headers['x-user-role'];
+    if (requesterRole !== 'admin') return res.status(403).json({ message: "Admin access required" });
     try {
         const emis = await EMI.find();
         res.json(emis);

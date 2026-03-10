@@ -41,11 +41,24 @@ const DatabaseManager = {
             document.body.appendChild(toast);
         }, 1500); // Show after 1.5s delay
 
+        // Append Security Headers if logged in
+        const authHeaders = {};
+        if (currentUser) {
+            const uid = currentUser._id || currentUser.id;
+            authHeaders['x-user-id'] = uid;
+            authHeaders['x-user-role'] = currentUser.role || 'user';
+            
+            if (currentUser.role === 'admin') {
+                authHeaders['x-admin-id'] = uid;
+            }
+        }
+
         try {
             const response = await fetch(`${SYNC_SERVER}${endpoint}`, {
                 ...options,
                 headers: {
                     'Content-Type': 'application/json',
+                    ...authHeaders,
                     ...options.headers
                 }
             });

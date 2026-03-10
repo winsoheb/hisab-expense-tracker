@@ -4,6 +4,27 @@ const ActivityLog = require('../models/ActivityLog');
 const User = require('../models/User');
 const Transaction = require('../models/Transaction');
 
+// Middleware to check if user is admin
+// Note: In a production app, this should verify a JWT token
+const isAdmin = async (req, res, next) => {
+    const adminId = req.headers['x-admin-id'] || req.query.adminId;
+    if (!adminId) return res.status(401).json({ message: "Admin ID required" });
+
+    try {
+        const user = await User.findById(adminId);
+        if (user && user.role === 'admin') {
+            next();
+        } else {
+            res.status(403).json({ message: "Access denied. Admin only." });
+        }
+    } catch (err) {
+        res.status(500).json({ message: "Authorization error" });
+    }
+};
+
+// Apply to all routes in this file
+router.use(isAdmin);
+
 // Get all activity logs
 router.get('/activity', async (req, res) => {
     try {
