@@ -773,6 +773,10 @@ table tr:hover {
     color: var(--text-main);
 }
 
+#mobile-user-name {
+    display: none;
+}
+
 .mobile-theme-toggle {
     display: none;
     position: relative;
@@ -857,6 +861,10 @@ table tr:hover {
 
     .sidebar-footer {
         display: none; /* Will move these functions to top bar for mobile if needed, or hide if no space */
+    }
+
+    #mobile-user-name {
+        display: block !important;
     }
 
     .mobile-theme-toggle {
