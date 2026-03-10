@@ -355,6 +355,17 @@ registerForm?.addEventListener('submit', async (e) => {
     const email = document.getElementById('reg-email').value;
     const pass = document.getElementById('reg-password').value;
 
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        return showError("Please enter a valid email address.");
+    }
+
+    // Password validation (greater than 6 characters)
+    if (pass.length <= 6) {
+        return showError("Password must be greater than 6 characters.");
+    }
+
     try {
         const newUser = await DatabaseManager.addUser({ name, email, password: pass });
         await loginUser(newUser);
