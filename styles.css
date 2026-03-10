@@ -782,9 +782,10 @@ table tr:hover {
     font-size: 1.5rem;
     font-weight: 600;
     color: var(--text-main);
-    display: flex;
-    align-items: center;
 }
+
+.desktop-only { display: block; }
+.mobile-only { display: none; }
 
 #mobile-user-name {
     display: none;
@@ -834,6 +835,9 @@ table tr:hover {
         background: var(--card-bg);
         opacity: 1 !important;
     }
+
+    .desktop-only { display: none !important; }
+    .mobile-only { display: block !important; }
 
     /* Hide the sidebar toggle button on mobile since it's a bottom bar */
     #desktop-sidebar-toggle {
