@@ -374,6 +374,8 @@ function logout() {
 
 logoutBtn?.addEventListener('click', logout);
 adminLogoutBtn?.addEventListener('click', logout);
+const mobileLogoutBtn = document.getElementById('mobile-logout-btn');
+if (mobileLogoutBtn) mobileLogoutBtn.addEventListener('click', logout);
 
 async function loginUser(user) {
     currentUser = user;
