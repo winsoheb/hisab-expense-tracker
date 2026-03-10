@@ -20,57 +20,65 @@
 
 <body>
     <div class="dashboard" id="app-dashboard" style="display: none;">
-        <!-- Header / Total Balance -->
-        <header class="header card-glass">
-            <div class="user-controls">
-                <span id="user-name"><img src="./logo.png" alt="Hisab Logo" style="width: 24px; vertical-align: middle; margin-right: 8px; border-radius: 4px;"> Hisab</span>
-                <div style="display:flex; gap:0.5rem;">
-                    <button id="theme-toggle" class="btn-secondary" title="Toggle Theme"><i class="fa-solid fa-moon"></i></button>
-                    <button id="logout-btn" class="btn-secondary"><i class="fa-solid fa-right-from-bracket"></i>
-                        Logout</button>
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar card-solid">
+            <div class="sidebar-header">
+                <span id="user-name" style="font-size: 1.25rem; font-weight: 700; color: var(--text-main);"><img src="./logo.png" alt="Hisab Logo" style="width: 28px; vertical-align: middle; margin-right: 12px; border-radius: 6px;"> Hisab</span>
+            </div>
+
+            <nav class="app-nav">
+                <button id="nav-overview" class="nav-btn active"><i class="fa-solid fa-house"></i> Overview</button>
+                <button id="nav-transactions" class="nav-btn"><i class="fa-solid fa-money-bill-transfer"></i> Transactions</button>
+                <button id="nav-reports" class="nav-btn"><i class="fa-solid fa-chart-pie"></i> Reports</button>
+                <button id="nav-emis" class="nav-btn"><i class="fa-solid fa-hand-holding-dollar"></i> EMIs</button>
+                <button id="nav-database" class="nav-btn"><i class="fa-solid fa-database"></i> Database</button>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button id="theme-toggle" class="btn-secondary" title="Toggle Theme"><i class="fa-solid fa-moon"></i></button>
+                <button id="logout-btn" class="btn-secondary"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+            </div>
+        </aside>
+
+        <div class="main-wrapper">
+            <header class="top-bar">
+                <div class="top-bar-title">Dashboard</div>
+                <div class="top-bar-actions" style="display: flex; gap: 1rem; align-items: center; text-align: right;">
+                    <div class="mobile-theme-toggle">
+                        <button id="mobile-theme-btn" class="btn-secondary" style="padding: 0.5rem 1rem;"><i class="fa-solid fa-moon"></i></button>
+                    </div>
+                    <div class="balance-container">
+                        <p>Total Balance</p>
+                        <h1 id="total-balance">₹0.00</h1>
+                    </div>
                 </div>
-            </div>
-
-            <!-- App Navigation -->
-            <div class="app-nav">
-                <button id="nav-overview" class="nav-btn active">Overview</button>
-                <button id="nav-transactions" class="nav-btn">Transactions</button>
-                <button id="nav-reports" class="nav-btn">Reports</button>
-                <button id="nav-emis" class="nav-btn">EMIs</button>
-                <button id="nav-database" class="nav-btn">Database</button>
-            </div>
-
-            <div class="balance-container">
-                <p>Total Balance</p>
-                <h1 id="total-balance">₹0.00</h1>
-            </div>
-        </header>
+            </header>
 
         <!-- Overview View (Main Dashboard) -->
         <div class="overview-content" id="overview-view">
             <section class="summary-cards">
-                <div class="card card-glass income">
+                <div class="card card-solid income">
                     <div class="card-icon"><i class="fa-solid fa-arrow-trend-up"></i></div>
                     <div class="card-info">
                         <h3>This Month's Income</h3>
                         <p id="overview-income">+₹0.00</p>
                     </div>
                 </div>
-                <div class="card card-glass expense">
+                <div class="card card-solid expense">
                     <div class="card-icon"><i class="fa-solid fa-arrow-trend-down"></i></div>
                     <div class="card-info">
                         <h3>This Month's Expense</h3>
                         <p id="overview-expense">-₹0.00</p>
                     </div>
                 </div>
-                <div class="card card-glass investment">
+                <div class="card card-solid investment">
                     <div class="card-icon"><i class="fa-solid fa-building-columns"></i></div>
                     <div class="card-info">
                         <h3>Total Active EMI Deductions</h3>
                         <p id="overview-emi-deductions">-₹0.00</p>
                     </div>
                 </div>
-                <div class="card card-glass borrowed-bg" style="border-left: 4px solid #f59e0b;">
+                <div class="card card-solid borrowed-bg" style="border-left: 4px solid #f59e0b;">
                     <div class="card-icon"><i class="fa-solid fa-hand-holding-dollar" style="color:#f59e0b;"></i></div>
                     <div class="card-info">
                         <h3>Total Borrowed (Debt)</h3>
@@ -79,7 +87,7 @@
                 </div>
             </section>
 
-            <section class="quick-actions card-glass mt-2">
+            <section class="quick-actions card-solid mt-2">
                 <h2>Quick Actions</h2>
                 <div class="actions-grid">
                     <button id="qa-add-income" class="btn-action income-btn"><i class="fa-solid fa-plus"></i> Add
@@ -98,7 +106,7 @@
         <div class="main-content" id="transactions-view" style="display: none;">
             <!-- Left Column: Add Transaction Form & Chart -->
             <div class="left-col">
-                <section class="add-transaction card-glass">
+                <section class="add-transaction card-solid">
                     <h2>Add New Transaction</h2>
                     <form id="transaction-form">
                         <div class="form-group">
@@ -135,7 +143,7 @@
                     </form>
                 </section>
 
-                <section class="chart-container card-glass">
+                <section class="chart-container card-solid">
                     <h2>Financial Overview</h2>
                     <div class="chart-wrapper">
                         <canvas id="expenseChart"></canvas>
@@ -145,7 +153,7 @@
 
             <!-- Right Column: Transaction History -->
             <div class="right-col">
-                <section class="transaction-history card-glass">
+                <section class="transaction-history card-solid">
                     <h2>Recent Transactions</h2>
                     <div class="history-list" id="transaction-list">
                         <!-- Transactions injected via JS -->
@@ -158,7 +166,7 @@
         <!-- EMIs View -->
         <div class="main-content" id="emis-view" style="display: none;">
             <div class="left-col">
-                <section class="add-transaction card-glass">
+                <section class="add-transaction card-solid">
                     <h2>Add New Loan/EMI</h2>
                     <form id="emi-form">
                         <div class="form-group">
@@ -192,7 +200,7 @@
                 </section>
             </div>
             <div class="right-col">
-                <section class="transaction-history card-glass">
+                <section class="transaction-history card-solid">
                     <h2>Active EMIs</h2>
                     <div class="history-list" id="emi-list">
                         <div class="empty-state">No active EMIs tracked.</div>
@@ -206,7 +214,7 @@
             <div class="grid-2">
                 <!-- Left: Filters & Chart -->
                 <div class="left-col">
-                    <section class="card-glass mb-2">
+                    <section class="card-solid mb-2">
                         <h2>Report Filters</h2>
                         <div class="form-group row-flex">
                             <label for="date-range" style="white-space:nowrap; margin-right: 1rem;">Date Range:</label>
@@ -240,7 +248,7 @@
                         </div>
                     </section>
 
-                    <section class="chart-container card-glass">
+                    <section class="chart-container card-solid">
                         <h2>Report Overview</h2>
                         <div class="chart-wrapper">
                             <canvas id="reportChart"></canvas>
@@ -250,7 +258,7 @@
 
                 <!-- Right: Filtered List -->
                 <div class="right-col">
-                    <section class="transaction-history card-glass">
+                    <section class="transaction-history card-solid">
                         <h2>Filtered Transactions</h2>
                         <div class="history-list" id="report-transaction-list">
                             <div class="empty-state">Loading reports...</div>
@@ -264,7 +272,7 @@
         <div class="main-content" id="database-view" style="display: none; padding: 2rem;">
             <div class="grid-2">
                 <div class="left-col">
-                    <section class="card-glass">
+                    <section class="card-solid">
                         <h2><i class="fa-solid fa-file-export"></i> Backup & Restore</h2>
                         <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.9rem;">
                             Keep your data safe by exporting it to a file. You can restore your data anytime by uploading a previous backup.
@@ -287,7 +295,7 @@
                 </div>
                 
                 <div class="right-col">
-                    <section class="card-glass">
+                    <section class="card-solid">
                         <h2><i class="fa-solid fa-circle-info"></i> Data Statistics</h2>
                         <div id="database-stats" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
                             <div class="stat-box" style="background: var(--card-bg); padding: 1rem; border-radius: 12px; border: 1px solid var(--card-border); text-align: center;">
@@ -301,7 +309,7 @@
                         </div>
                     </section>
                     
-                    <section class="card-glass" style="margin-top: 1.5rem; border: 1px solid var(--accent-primary);">
+                    <section class="card-solid" style="margin-top: 1.5rem; border: 1px solid var(--accent-primary);">
                         <h2><i class="fa-solid fa-cloud-arrow-up"></i> Cloud Sync</h2>
                         <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.9rem;">
                             Synchronize your local data with the cloud. This will upload all local transactions and EMIs to your online account.
@@ -312,7 +320,7 @@
                         <div id="sync-status" style="margin-top: 1rem; font-size: 0.85rem; text-align: center; display: none; color: var(--accent-primary);"></div>
                     </section>
                     
-                    <section class="card-glass" style="margin-top: 1.5rem; border: 1px solid #ef444433;">
+                    <section class="card-solid" style="margin-top: 1.5rem; border: 1px solid #ef444433;">
                         <h2 style="color: #ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> Danger Zone</h2>
                         <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.9rem;">
                             Factory reset will permanently delete all your data, including transactions, EMIs, and user settings. This action cannot be undone.
@@ -325,7 +333,7 @@
             </div>
 
             <!-- Data Explorer Section -->
-            <section class="card-glass mt-2">
+            <section class="card-solid mt-2">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
                     <h2><i class="fa-solid fa-magnifying-glass"></i> Data Explorer</h2>
                     <div class="explorer-tabs" style="display: flex; gap: 0.5rem;">
@@ -349,11 +357,13 @@
                 </div>
             </section>
         </div>
+        </div>
+        </div>
     </div>
 
     <!-- Login/Register Overlay -->
     <div id="login-overlay" class="login-overlay">
-        <div class="login-card card-glass">
+        <div class="login-card card-solid">
             <div class="login-header">
                 <h2><img src="./logo.png" alt="Hisab Logo" style="width: 32px; vertical-align: middle; margin-right: 8px; border-radius: 6px;"> Welcome to Hisab</h2>
                 <p>Manage your finances securely.</p>
@@ -400,23 +410,27 @@
 
     <!-- Admin Dashboard (Hidden by Default) -->
     <div class="dashboard" id="admin-dashboard" style="display: none;">
-        <header class="header card-glass admin-header">
-            <div class="user-controls">
-                <span><img src="./logo.png" alt="Hisab Logo" style="width: 24px; vertical-align: middle; margin-right: 8px; border-radius: 4px;"> Admin Portal</span>
-                <div style="display:flex; gap:0.5rem;">
-                    <button id="admin-theme-toggle" class="btn-secondary" title="Toggle Theme"><i class="fa-solid fa-moon"></i></button>
-                    <button id="admin-logout-btn" class="btn-secondary"><i class="fa-solid fa-right-from-bracket"></i>
-                        Logout</button>
+        <aside class="sidebar card-solid">
+            <div class="sidebar-header">
+                <span style="font-size: 1.25rem; font-weight: 700; color: var(--text-main);"><img src="./logo.png" alt="Hisab Logo" style="width: 28px; vertical-align: middle; margin-right: 12px; border-radius: 6px;"> Admin Portal</span>
+            </div>
+
+            <div class="sidebar-footer" style="margin-top: auto;">
+                <button id="admin-theme-toggle" class="btn-secondary" title="Toggle Theme"><i class="fa-solid fa-moon"></i></button>
+                <button id="admin-logout-btn" class="btn-secondary"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+            </div>
+        </aside>
+        <div class="main-wrapper">
+            <header class="top-bar">
+                <div class="top-bar-title">Admin Controls</div>
+                <div class="balance-container">
+                    <p>System-wide Transaction Volume</p>
+                    <h1 id="admin-total-volume">₹0.00</h1>
                 </div>
-            </div>
-            <div class="balance-container">
-                <p>System-wide Transaction Volume</p>
-                <h1 id="admin-total-volume">₹0.00</h1>
-            </div>
-        </header>
+            </header>
 
         <section class="admin-panels">
-            <div class="admin-panel card-glass">
+            <div class="admin-panel card-solid">
                 <h2>System Users</h2>
                 <div class="table-responsive">
                     <table id="admin-users-table">
@@ -433,13 +447,14 @@
                 </div>
             </div>
 
-            <div class="admin-panel card-glass">
+            <div class="admin-panel card-solid">
                 <h2>Global Recent Transactions</h2>
                 <div class="history-list" id="admin-tx-list">
                     <!-- Injected via JS -->
                 </div>
             </div>
         </section>
+        </div>
     </div>
 
     <!-- Chart.js -->

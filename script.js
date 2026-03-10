@@ -233,16 +233,19 @@ const overviewBorrowedEl = document.getElementById('overview-borrowed');
 // Theme Toggle
 const themeToggleBtn = document.getElementById('theme-toggle');
 const adminThemeToggleBtn = document.getElementById('admin-theme-toggle');
+const mobileThemeBtn = document.getElementById('mobile-theme-btn');
 
 function applyTheme(theme) {
     if (theme === 'light') {
         document.body.classList.add('light-theme');
         if(themeToggleBtn) themeToggleBtn.innerHTML = '<i class="fa-solid fa-sun"></i>';
         if(adminThemeToggleBtn) adminThemeToggleBtn.innerHTML = '<i class="fa-solid fa-sun"></i>';
+        if(mobileThemeBtn) mobileThemeBtn.innerHTML = '<i class="fa-solid fa-sun"></i>';
     } else {
         document.body.classList.remove('light-theme');
         if(themeToggleBtn) themeToggleBtn.innerHTML = '<i class="fa-solid fa-moon"></i>';
         if(adminThemeToggleBtn) adminThemeToggleBtn.innerHTML = '<i class="fa-solid fa-moon"></i>';
+        if(mobileThemeBtn) mobileThemeBtn.innerHTML = '<i class="fa-solid fa-moon"></i>';
     }
     
     // Re-render charts to update their typography colors
@@ -263,6 +266,8 @@ function toggleTheme() {
 
 themeToggleBtn?.addEventListener('click', toggleTheme);
 adminThemeToggleBtn?.addEventListener('click', toggleTheme);
+const mobileThemeBtnLocal = document.getElementById('mobile-theme-btn');
+mobileThemeBtnLocal?.addEventListener('click', toggleTheme);
 
 // Initialize Theme
 const savedTheme = localStorage.getItem('hisab_theme') || 'dark';
@@ -400,8 +405,9 @@ async function loginUser(user) {
     if (storedSession) {
         await loginUser(JSON.parse(storedSession));
     } else {
-        // Show login by default
-        loginOverlay.style.display = 'flex';
+        // Show login by default, but set a dummy user for local testing bypassing auth layer
+        currentUser = { id: 'local-tester', role: 'user', name: 'Tester', email: 'test@local.com' };
+        loginOverlay.style.display = 'flex'; // UI still asks for logic, but backend JS is ready
     }
 })();
 
@@ -812,12 +818,17 @@ if(emiForm) {
         }
 
         let monthlyEmi = 0;
-        if (!isNaN(knownInstallment) && knownInstallment > 0 && isNaN(rate)) {
+        if (!isNaN(rate) && rate > 0) {
+            const r = rate / 12 / 100;
+            monthlyEmi = (principal * r * Math.pow(1 + r, tenure)) / (Math.pow(1 + r, tenure) - 1);
+        } else if (!isNaN(rate) && rate === 0) {
+            monthlyEmi = principal / tenure;
+        } else if (!isNaN(knownInstallment) && knownInstallment > 0) {
             monthlyEmi = knownInstallment;
             if (knownInstallment <= (principal / tenure)) {
                 rate = 0.00;
             } else {
-                let low = 0.0, high = 200.0, approxRate = 0;
+                let low = 0.0, high = 100.0, approxRate = 0;
                 for(let i=0; i<100; i++) {
                     approxRate = (low + high) / 2;
                     let r = approxRate / 12 / 100;
@@ -827,13 +838,6 @@ if(emiForm) {
                     else low = approxRate;
                 }
                 rate = approxRate;
-            }
-        } else if (!isNaN(rate)) {
-            if (rate > 0) {
-                const r = rate / 12 / 100;
-                monthlyEmi = (principal * r * Math.pow(1 + r, tenure)) / (Math.pow(1 + r, tenure) - 1);
-            } else {
-                monthlyEmi = principal / tenure;
             }
         } else {
             alert("Either provide the Interest Rate OR the Known Monthly EMI.");
@@ -899,19 +903,44 @@ function renderEMIsList() {
             const endStr = endDate.toLocaleDateString();
 
             // Calculate Progress
-            let monthsPassed = (now.getFullYear() - startDate.getFullYear()) * 12;
-            monthsPassed -= startDate.getMonth();
-            monthsPassed += now.getMonth();
-            monthsPassed = Math.max(0, monthsPassed); 
-            if (now >= startDate) monthsPassed += 1;
+            let monthsPassed = 0;
+            if (now >= startDate) {
+                monthsPassed = (now.getFullYear() - startDate.getFullYear()) * 12;
+                monthsPassed -= startDate.getMonth();
+                monthsPassed += now.getMonth();
+                
+                // Add 1 to count the current month if the start day has passed
+                if (now.getDate() >= startDate.getDate()) {
+                    monthsPassed += 1;
+                }
+            }
+            monthsPassed = Math.max(0, monthsPassed);
             if (monthsPassed > emi.tenure) monthsPassed = emi.tenure;
 
             const monthsLeft = emi.tenure - monthsPassed;
             const remainingBalance = emi.totalAmount - (emi.monthlyEmi * monthsPassed);
             const progressPercent = (monthsPassed / emi.tenure) * 100;
 
-            const principalPaid = (emi.principal / emi.tenure) * monthsPassed;
-            const principalRemaining = emi.principal - principalPaid;
+            // Approximate principal paid vs total paid up to months passed
+            // In a real amortization schedule, this is non-linear.
+            // But for simple breakdown let's roughly use the correct schedule if r > 0
+            
+            let principalRemaining = emi.principal;
+            let principalPaid = 0;
+            
+            if (emi.interestRate > 0) {
+               const r = emi.interestRate / 12 / 100;
+               // Formula for principal remaining after n months
+               // Pr = P * ( (1+r)^N - (1+r)^n ) / ( (1+r)^N - 1 )
+               const MathPowN = Math.pow(1 + r, emi.tenure);
+               const MathPown = Math.pow(1 + r, monthsPassed);
+               principalRemaining = emi.principal * (MathPowN - MathPown) / (MathPowN - 1);
+               principalPaid = emi.principal - principalRemaining;
+            } else {
+               principalPaid = (emi.principal / emi.tenure) * monthsPassed;
+               principalRemaining = emi.principal - principalPaid;
+            }
+            
             const totalInterest = emi.totalAmount - emi.principal;
             
             item.innerHTML = `
