@@ -696,6 +696,27 @@ async function renderUserDashboard() {
     updateValues();
 }
 
+function showToast(message, type = 'success') {
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    
+    let icon = 'fa-check-circle';
+    if(type === 'error') icon = 'fa-exclamation-circle';
+    if(type === 'warning') icon = 'fa-triangle-exclamation';
+
+    toast.innerHTML = `<i class="fa-solid ${icon} toast-icon"></i> <span>${message}</span>`;
+    document.body.appendChild(toast);
+
+    // Dynamic reflow and show
+    setTimeout(() => toast.classList.add('show'), 10);
+
+    // Auto remove
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 400);
+    }, 4000);
+}
+
 async function handleAddTransaction(e) {
     e.preventDefault();
     if (!currentUser || currentUser.role !== 'user') return;
@@ -706,35 +727,48 @@ async function handleAddTransaction(e) {
     const mode = document.getElementById('mode').value;
     const date = document.getElementById('date').value;
 
-    if (name.trim() === '' || amountStr.trim() === '' || date.trim() === '') {
-        alert('Please fill in all fields');
+    // Field Validation
+    if (!name.trim() || !amountStr.trim() || !date.trim()) {
+        showToast('Please fill in all required fields (Name, Amount, Date)', 'error');
         return;
     }
 
-    const tx = await DatabaseManager.addTransaction({
-        userId: (currentUser._id || currentUser.id),
-        type,
-        name,
-        amount: parseFloat(amountStr),
-        mode,
-        date,
-        createdAt: new Date().toISOString()
-    });
-
-    currentTransactions.push(tx);
-    
-    // Clear empty state if needed
-    if (currentTransactions.length === 1 && listEl.innerHTML.includes('empty-state')) {
-        listEl.innerHTML = '';
+    const amount = parseFloat(amountStr);
+    if (isNaN(amount) || amount <= 0) {
+        showToast('Please enter a valid positive amount', 'error');
+        return;
     }
-    
-    addTransactionDOM(tx); // adds to DOM top
-    updateValues();
 
-    // Reset inputs
-    document.getElementById('name').value = '';
-    document.getElementById('amount').value = '';
-    document.getElementById('mode').value = 'upi';
+    try {
+        const tx = await DatabaseManager.addTransaction({
+            userId: (currentUser._id || currentUser.id),
+            type,
+            name,
+            amount: amount,
+            mode,
+            date,
+            createdAt: new Date().toISOString()
+        });
+
+        currentTransactions.push(tx);
+        
+        // Clear empty state if needed
+        if (currentTransactions.length === 1 && listEl.innerHTML.includes('empty-state')) {
+            listEl.innerHTML = '';
+        }
+        
+        addTransactionDOM(tx); // adds to DOM top
+        updateValues();
+
+        // Reset inputs
+        document.getElementById('name').value = '';
+        document.getElementById('amount').value = '';
+        document.getElementById('mode').value = 'upi';
+
+        showToast(`${type.charAt(0).toUpperCase() + type.slice(1)} recorded successfully!`);
+    } catch (err) {
+        showToast('Failed to save transaction: ' + err.message, 'error');
+    }
 }
 
 if(formEl) formEl.addEventListener('submit', handleAddTransaction);
@@ -987,7 +1021,7 @@ if(emiForm) {
 
         // ... same calculation logic ...
         if (!name || isNaN(principal) || isNaN(tenure) || !startDate) {
-            alert('Please fill Principal, Tenure, and Start Date validly.');
+            showToast('Please fill Principal, Tenure, and Start Date validly.', 'error');
             return;
         }
 
@@ -1014,7 +1048,7 @@ if(emiForm) {
                 rate = approxRate;
             }
         } else {
-            alert("Either provide the Interest Rate OR the Known Monthly EMI.");
+            showToast("Either provide the Interest Rate OR the Known Monthly EMI.", 'error');
             return;
         }
 
@@ -1037,9 +1071,11 @@ if(emiForm) {
             if (index > -1) currentEMIs[index] = { ...currentEMIs[index], ...emiData };
             document.getElementById('emi-submit-btn').innerText = "Calculate & Add EMI";
             document.getElementById('emi-id').value = "";
+            showToast("EMI updated successfully!");
         } else {
             const emiObj = await DatabaseManager.addEMI(emiData);
             currentEMIs.push(emiObj);
+            showToast("EMI record added successfully!");
         }
         
         document.getElementById('emi-form').reset();
