@@ -223,6 +223,7 @@ const authError = document.getElementById('auth-error');
 const logoutBtn = document.getElementById('logout-btn');
 const adminLogoutBtn = document.getElementById('admin-logout-btn');
 const userNameEl = document.getElementById('user-name');
+const mobileUserNameEl = document.getElementById('mobile-user-name');
 
 // DOM Elements: Overview Dash
 const overviewIncomeEl = document.getElementById('overview-income');
@@ -544,7 +545,9 @@ async function renderUserDashboard() {
     appDashboard.style.display = 'flex';
     overviewView.style.display = 'block';
     adminDashboard.style.display = 'none';
-    userNameEl.innerText = `Hi, ${currentUser.name.split(' ')[0]}`;
+    const firstName = currentUser.name.split(' ')[0];
+    if (userNameEl) userNameEl.innerHTML = `<img src="./logo.png" alt="Hisab Logo" style="width: 28px; vertical-align: middle; margin-right: 12px; border-radius: 6px;"> Hi, ${firstName}`;
+    if (mobileUserNameEl) mobileUserNameEl.innerText = `Hi, ${firstName}`;
 
     // Get strictly this user's data
     currentTransactions = await DatabaseManager.getTransactions((currentUser._id || currentUser.id));
