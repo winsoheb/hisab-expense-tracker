@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
 const Transaction = require('../models/Transaction');
 
 // Get all for user
@@ -36,7 +37,12 @@ router.post('/', async (req, res) => {
 // Delete
 router.delete('/:id', async (req, res) => {
     try {
-        const tx = await Transaction.findByIdAndDelete(req.params.id);
+        const isValidObjectId = mongoose.Types.ObjectId.isValid(req.params.id);
+        let tx = null;
+        if (isValidObjectId) {
+            tx = await Transaction.findByIdAndDelete(req.params.id);
+        }
+
         if (!tx) {
             // Check if it's a docId (legacy/fallback)
             await Transaction.findOneAndDelete({ docId: req.params.id });
@@ -50,7 +56,12 @@ router.delete('/:id', async (req, res) => {
 // Update
 router.patch('/:id', async (req, res) => {
     try {
-        let tx = await Transaction.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        const isValidObjectId = mongoose.Types.ObjectId.isValid(req.params.id);
+        let tx = null;
+        if (isValidObjectId) {
+            tx = await Transaction.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        }
+
         if (!tx) {
             tx = await Transaction.findOneAndUpdate({ docId: req.params.id }, req.body, { new: true });
         }

@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
 const EMI = require('../models/EMI');
 
 // Get all for user
@@ -36,11 +37,15 @@ router.post('/', async (req, res) => {
 // Update
 router.patch('/:id', async (req, res) => {
     try {
-        const emi = await EMI.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        const isValidObjectId = mongoose.Types.ObjectId.isValid(req.params.id);
+        let emi = null;
+        if (isValidObjectId) {
+            emi = await EMI.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        }
+        
         if (!emi) {
              // Fallback for docId
-             const updated = await EMI.findOneAndUpdate({ docId: req.params.id }, req.body, { new: true });
-             return res.json(updated);
+             emi = await EMI.findOneAndUpdate({ docId: req.params.id }, req.body, { new: true });
         }
         res.json(emi);
     } catch (err) {
@@ -51,7 +56,12 @@ router.patch('/:id', async (req, res) => {
 // Delete
 router.delete('/:id', async (req, res) => {
     try {
-        const emi = await EMI.findByIdAndDelete(req.params.id);
+        const isValidObjectId = mongoose.Types.ObjectId.isValid(req.params.id);
+        let emi = null;
+        if (isValidObjectId) {
+            emi = await EMI.findByIdAndDelete(req.params.id);
+        }
+        
         if(!emi) {
             await EMI.findOneAndDelete({ docId: req.params.id });
         }
