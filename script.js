@@ -231,10 +231,19 @@ const overviewExpenseEl = document.getElementById('overview-expense');
 const overviewEmiEl = document.getElementById('overview-emi-deductions');
 const overviewBorrowedEl = document.getElementById('overview-borrowed');
 
-// Theme Toggle
 const themeToggleBtn = document.getElementById('theme-toggle');
 const adminThemeToggleBtn = document.getElementById('admin-theme-toggle');
 const mobileThemeBtn = document.getElementById('mobile-theme-btn');
+
+// Sidebar Toggle
+const mainSidebar = document.getElementById('main-sidebar');
+const desktopSidebarToggle = document.getElementById('desktop-sidebar-toggle');
+
+if (desktopSidebarToggle && mainSidebar) {
+    desktopSidebarToggle.addEventListener('click', () => {
+        mainSidebar.classList.toggle('collapsed');
+    });
+}
 
 function applyTheme(theme) {
     if (theme === 'dark') {

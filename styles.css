@@ -709,6 +709,17 @@ table tr:hover {
     flex-direction: column;
     padding: 2rem 1.5rem;
     height: 100vh;
+    transition: width 0.3s ease, min-width 0.3s ease, padding 0.3s ease, opacity 0.2s ease;
+    overflow-x: hidden;
+}
+
+.sidebar.collapsed {
+    width: 0;
+    min-width: 0;
+    padding-left: 0;
+    padding-right: 0;
+    opacity: 0;
+    border-right: none;
 }
 
 .sidebar-header {
@@ -771,6 +782,8 @@ table tr:hover {
     font-size: 1.5rem;
     font-weight: 600;
     color: var(--text-main);
+    display: flex;
+    align-items: center;
 }
 
 #mobile-user-name {
@@ -804,8 +817,8 @@ table tr:hover {
     }
 
     .sidebar {
-        width: 100%;
-        min-width: 100%;
+        width: 100% !important;
+        min-width: 100% !important;
         height: auto;
         padding: 0.5rem;
         border-right: none;
@@ -819,6 +832,12 @@ table tr:hover {
         left: 0;
         z-index: 1000;
         background: var(--card-bg);
+        opacity: 1 !important;
+    }
+
+    /* Hide the sidebar toggle button on mobile since it's a bottom bar */
+    #desktop-sidebar-toggle {
+        display: none !important;
     }
 
     .sidebar-header {

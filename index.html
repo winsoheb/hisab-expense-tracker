@@ -24,7 +24,7 @@
 <body>
     <div class="dashboard" id="app-dashboard" style="display: none;">
         <!-- Sidebar Navigation -->
-        <aside class="sidebar card-solid">
+        <aside class="sidebar card-solid" id="main-sidebar">
             <div class="sidebar-header">
                 <span id="user-name" style="font-size: 1.25rem; font-weight: 700; color: var(--text-main);"><img src="./logo.png" alt="Hisab Logo" style="width: 28px; vertical-align: middle; margin-right: 12px; border-radius: 6px;"> Hisab</span>
             </div>
@@ -47,6 +47,9 @@
             <header class="top-bar">
                 <div class="top-bar-title">
                     <span id="mobile-user-name" style="font-size: 1rem; color: var(--text-muted); margin-bottom: 0.2rem; font-weight: normal;"></span>
+                    <button id="desktop-sidebar-toggle" class="btn-secondary" style="margin-right: 0.75rem; padding: 0.4rem 0.6rem; font-size: 1rem; cursor: pointer; border: none; background: transparent;" title="Toggle Sidebar">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
                     Dashboard
                 </div>
                 <div class="top-bar-actions" style="display: flex; gap: 1rem; align-items: center;">
