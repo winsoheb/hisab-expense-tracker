@@ -15,7 +15,7 @@
     <!-- FontAwesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css?v=3">
 </head>
 
 <body>
@@ -35,7 +35,7 @@
             </nav>
 
             <div class="sidebar-footer">
-                <button id="theme-toggle" class="btn-secondary" title="Toggle Theme"><i class="fa-solid fa-moon"></i></button>
+                <button id="theme-toggle" class="btn-secondary" title="Toggle Theme" onclick="toggleTheme()"><i class="fa-solid fa-moon"></i></button>
                 <button id="logout-btn" class="btn-secondary"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
             </div>
         </aside>
@@ -45,7 +45,7 @@
                 <div class="top-bar-title">Dashboard</div>
                 <div class="top-bar-actions" style="display: flex; gap: 1rem; align-items: center; text-align: right;">
                     <div class="mobile-theme-toggle">
-                        <button id="mobile-theme-btn" class="btn-secondary" style="padding: 0.5rem 1rem;"><i class="fa-solid fa-moon"></i></button>
+                        <button id="mobile-theme-btn" class="btn-secondary" style="padding: 0.5rem 1rem;" onclick="toggleTheme()"><i class="fa-solid fa-moon"></i></button>
                     </div>
                     <div class="balance-container">
                         <p>Total Balance</p>
@@ -416,7 +416,7 @@
             </div>
 
             <div class="sidebar-footer" style="margin-top: auto;">
-                <button id="admin-theme-toggle" class="btn-secondary" title="Toggle Theme"><i class="fa-solid fa-moon"></i></button>
+                <button id="admin-theme-toggle" class="btn-secondary" title="Toggle Theme" onclick="toggleTheme()"><i class="fa-solid fa-moon"></i></button>
                 <button id="admin-logout-btn" class="btn-secondary"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
             </div>
         </aside>
@@ -461,7 +461,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <!-- Local JS app -->
-    <script src="script.js"></script>
+    <script src="script.js?v=3"></script>
 </body>
 
 </html>
