@@ -860,7 +860,8 @@ table tr:hover {
     }
 
     .mobile-theme-toggle {
-        display: block !important;
+        display: flex !important;
+        gap: 0.5rem;
     }
 
     .main-wrapper {
