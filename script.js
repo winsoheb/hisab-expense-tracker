@@ -64,9 +64,9 @@ const DatabaseManager = {
             console.error("Fetch Error:", err);
             const fullUrl = `${SYNC_SERVER}${endpoint}`;
             if (err.message === 'Failed to fetch') {
-                alert(`Connection Error: Could not reach the server at ${fullUrl}.\n\nNote: If the server hasn't been used recently, it may take 50+ seconds to "wake up" (Render Free Tier).`);
+                showToast(`Connection Error: Could not reach the server. It may be warming up...`, 'error');
             } else {
-                alert("Error: " + err.message + ` (URL: ${fullUrl})`);
+                showToast("Error: " + err.message, 'error');
             }
             throw err;
         }
@@ -449,14 +449,20 @@ async function loginUser(user) {
     // Check for unsynced local data
     const localTxs = await DatabaseManager.getAllLocal('transactions');
     const localEmis = await DatabaseManager.getAllLocal('emis');
-        if (confirm(`You have ${localTxs.length + localEmis.length} local records that are not synced to the cloud. Would you like to sync them now?`)) {
-            // Trigger cloud sync directly or redirect to a relevant view if needed.
-            // For now, let's just trigger it if the button exists or provide a direct call.
+    const totalLocal = localTxs.length + localEmis.length;
+
+    if (totalLocal > 0) {
+        if (confirm(`You have ${totalLocal} local records that are not synced to the cloud. Would you like to sync them now?`)) {
             DatabaseManager.syncToCloud(currentUser._id || currentUser.id).then(() => {
-                alert("Cloud Sync Complete!");
-                renderUserDashboard();
+                showToast("Cloud Sync Complete!");
+                if (user.role === 'admin') {
+                    renderAdminDashboard();
+                } else {
+                    renderUserDashboard();
+                }
             });
         }
+    }
 }
 
 // Check session & App Entry Point
@@ -697,6 +703,10 @@ async function renderUserDashboard() {
 }
 
 function showToast(message, type = 'success') {
+    // Remove existing toasts to prevent overlapping in the same spot
+    const existingToasts = document.querySelectorAll('.toast');
+    existingToasts.forEach(t => t.remove());
+
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
     
