@@ -236,20 +236,20 @@ const adminThemeToggleBtn = document.getElementById('admin-theme-toggle');
 const mobileThemeBtn = document.getElementById('mobile-theme-btn');
 
 function applyTheme(theme) {
-    if (theme === 'light') {
-        document.body.classList.add('light-theme');
+    if (theme === 'dark') {
+        document.body.classList.add('dark-theme');
         if(themeToggleBtn) themeToggleBtn.innerHTML = '<i class="fa-solid fa-sun"></i>';
         if(adminThemeToggleBtn) adminThemeToggleBtn.innerHTML = '<i class="fa-solid fa-sun"></i>';
         if(mobileThemeBtn) mobileThemeBtn.innerHTML = '<i class="fa-solid fa-sun"></i>';
     } else {
-        document.body.classList.remove('light-theme');
+        document.body.classList.remove('dark-theme');
         if(themeToggleBtn) themeToggleBtn.innerHTML = '<i class="fa-solid fa-moon"></i>';
         if(adminThemeToggleBtn) adminThemeToggleBtn.innerHTML = '<i class="fa-solid fa-moon"></i>';
         if(mobileThemeBtn) mobileThemeBtn.innerHTML = '<i class="fa-solid fa-moon"></i>';
     }
     
     // Re-render charts to update their typography colors
-    if(Chart.instances.length > 0) {
+    if(Chart.instances && Object.keys(Chart.instances).length > 0) {
         Chart.defaults.color = getComputedStyle(document.body).getPropertyValue('--chart-text-color').trim();
         for(let id in Chart.instances) {
             Chart.instances[id].update();
@@ -258,8 +258,8 @@ function applyTheme(theme) {
 }
 
 function toggleTheme() {
-    const isLight = document.body.classList.contains('light-theme');
-    const newTheme = isLight ? 'dark' : 'light';
+    const isDark = document.body.classList.contains('dark-theme');
+    const newTheme = isDark ? 'light' : 'dark';
     localStorage.setItem('hisab_theme', newTheme);
     applyTheme(newTheme);
 }
