@@ -438,30 +438,38 @@ async function loginUser(user) {
     currentUser = user;
     localStorage.setItem('loggedInUser', JSON.stringify(user));
 
-    loginOverlay.style.display = 'none';
-    
-    if (user.role === 'admin') {
-        await renderAdminDashboard();
-    } else {
-        await renderUserDashboard();
-    }
-
-    // Check for unsynced local data
-    const localTxs = await DatabaseManager.getAllLocal('transactions');
-    const localEmis = await DatabaseManager.getAllLocal('emis');
-    const totalLocal = localTxs.length + localEmis.length;
-
-    if (totalLocal > 0) {
-        if (confirm(`You have ${totalLocal} local records that are not synced to the cloud. Would you like to sync them now?`)) {
-            DatabaseManager.syncToCloud(currentUser._id || currentUser.id).then(() => {
-                showToast("Cloud Sync Complete!");
-                if (user.role === 'admin') {
-                    renderAdminDashboard();
-                } else {
-                    renderUserDashboard();
-                }
-            });
+    try {
+        if (user.role === 'admin') {
+            await renderAdminDashboard();
+        } else {
+            await renderUserDashboard();
         }
+        
+        // Hide overlay only after successful initial render
+        loginOverlay.style.display = 'none';
+
+        // Check for unsynced local data
+        const localTxs = await DatabaseManager.getAllLocal('transactions');
+        const localEmis = await DatabaseManager.getAllLocal('emis');
+        const totalLocal = localTxs.length + localEmis.length;
+
+        if (totalLocal > 0) {
+            if (confirm(`You have ${totalLocal} local records that are not synced to the cloud. Would you like to sync them now?`)) {
+                DatabaseManager.syncToCloud(currentUser._id || currentUser.id).then(() => {
+                    showToast("Cloud Sync Complete!");
+                    if (user.role === 'admin') {
+                        renderAdminDashboard();
+                    } else {
+                        renderUserDashboard();
+                    }
+                });
+            }
+        }
+    } catch (err) {
+        console.error("Login Render Error:", err);
+        showToast("Error loading dashboard: " + err.message, "error");
+        // Keep or re-show login overlay if critical failure
+        loginOverlay.style.display = 'flex';
     }
 }
 
