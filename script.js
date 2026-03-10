@@ -405,11 +405,61 @@ async function loginUser(user) {
     if (storedSession) {
         await loginUser(JSON.parse(storedSession));
     } else {
-        // Show login by default, but set a dummy user for local testing bypassing auth layer
-        currentUser = { id: 'local-tester', role: 'user', name: 'Tester', email: 'test@local.com' };
-        loginOverlay.style.display = 'flex'; // UI still asks for logic, but backend JS is ready
+        // Show login by default
+        currentUser = null;
+        loginOverlay.style.display = 'flex';
     }
 })();
+
+// Google Identity Services Callback
+window.handleCredentialResponse = async (response) => {
+    try {
+        // Decode JWT token (standard Base64Url decoding)
+        const base64Url = response.credential.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        
+        const googleUser = JSON.parse(jsonPayload);
+        
+        // Structure the user profile for Hisab
+        const userProfile = {
+            id: googleUser.sub, // Unique Google ID
+            name: googleUser.name,
+            email: googleUser.email,
+            role: 'user', // Default role for standard users
+            picture: googleUser.picture
+        };
+
+        // Try to add or get the user from our DB
+        let localUser;
+        try {
+            // Check if user exists, if not, create them (password won't matter for OAuth)
+            localUser = await DatabaseManager.addUser({ 
+                 name: userProfile.name, 
+                 email: userProfile.email, 
+                 password: 'oauth_dummy_password', // Just a placeholder for local schema
+                 id: userProfile.id,
+                 role: userProfile.role
+            });
+        } catch (err) {
+            // User likely already exists, we can still log them in based on email match
+            const allUsers = await DatabaseManager.getUsers();
+            localUser = allUsers.find(u => u.email === userProfile.email);
+        }
+
+        if (localUser) {
+            await loginUser(localUser);
+        } else {
+            showError("Failed to synchronize Google Login with local database.");
+        }
+
+    } catch (error) {
+        console.error("Google Login Error:", error);
+        showError("Google Authentication failed. Please try again.");
+    }
+};
 
 
 // ----------------------------------------------------

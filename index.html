@@ -16,6 +16,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <link rel="stylesheet" href="styles.css">
+
+    <!-- Google Identity Services (GIS) -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 
 <body>
@@ -386,6 +389,30 @@
                 </div>
                 <button type="submit" class="btn-primary">Sign In</button>
             </form>
+
+            <div style="margin: 1.5rem 0; text-align: center; color: var(--text-muted); position: relative;">
+                <hr style="border: none; border-top: 1px solid var(--card-border); margin: 0; position: absolute; top: 50%; width: 100%; z-index: 1;">
+                <span style="background: var(--card-bg); padding: 0 10px; position: relative; z-index: 2; font-size: 0.9rem;">OR</span>
+            </div>
+
+            <!-- Google Sign-In Button Container -->
+            <div style="display: flex; justify-content: center; margin-bottom: 1rem;">
+                <div id="g_id_onload"
+                    data-client_id="579304023114-76d44l3kn21kkmdj3t3as96cghc7mddt.apps.googleusercontent.com"
+                    data-context="signin"
+                    data-ux_mode="popup"
+                    data-callback="handleCredentialResponse"
+                    data-auto_prompt="false">
+                </div>
+                <div class="g_id_signin"
+                    data-type="standard"
+                    data-shape="rectangular"
+                    data-theme="outline"
+                    data-text="signin_with"
+                    data-size="large"
+                    data-logo_alignment="left">
+                </div>
+            </div>
 
             <!-- Register Form -->
             <form id="register-form" style="display: none;">
