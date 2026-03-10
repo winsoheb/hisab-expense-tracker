@@ -449,12 +449,14 @@ async function loginUser(user) {
     // Check for unsynced local data
     const localTxs = await DatabaseManager.getAllLocal('transactions');
     const localEmis = await DatabaseManager.getAllLocal('emis');
-    if (localTxs.length > 0 || localEmis.length > 0) {
         if (confirm(`You have ${localTxs.length + localEmis.length} local records that are not synced to the cloud. Would you like to sync them now?`)) {
-            await switchTab('database');
-            document.getElementById('btn-sync-cloud')?.click();
+            // Trigger cloud sync directly or redirect to a relevant view if needed.
+            // For now, let's just trigger it if the button exists or provide a direct call.
+            DatabaseManager.syncToCloud(currentUser._id || currentUser.id).then(() => {
+                alert("Cloud Sync Complete!");
+                renderUserDashboard();
+            });
         }
-    }
 }
 
 // Check session & App Entry Point
@@ -930,14 +932,13 @@ function switchTab(tabId, subType = null) {
     navOverview.classList.remove('active');
     navTransactions.classList.remove('active');
     navReports.classList.remove('active');
+    navReports.classList.remove('active');
     navEmis.classList.remove('active');
-    navDatabase.classList.remove('active');
 
     overviewView.style.display = 'none';
     transactionsView.style.display = 'none';
     reportsView.style.display = 'none';
     emisView.style.display = 'none';
-    databaseView.style.display = 'none';
 
     if (tabId === 'overview') {
         navOverview.classList.add('active');
@@ -959,18 +960,12 @@ function switchTab(tabId, subType = null) {
         navEmis.classList.add('active');
         emisView.style.display = 'grid';
     }
-    else if (tabId === 'database') {
-        navDatabase.classList.add('active');
-        databaseView.style.display = 'block';
-        renderDatabaseStats();
-    }
 }
 
 navOverview?.addEventListener('click', () => switchTab('overview'));
 navTransactions?.addEventListener('click', () => switchTab('transactions'));
 navReports?.addEventListener('click', () => switchTab('reports'));
 navEmis?.addEventListener('click', () => switchTab('emis'));
-navDatabase?.addEventListener('click', () => switchTab('database'));
 
 
 // ----------------------------------------------------
@@ -1234,230 +1229,6 @@ function renderEMIsList() {
         });
     }
 }
-
-// ----------------------------------------------------
-// DATABASE MANAGEMENT LOGIC
-// ----------------------------------------------------
-
-async function renderDatabaseStats() {
-    if (!currentUser) return;
-    try {
-        const isAdmin = currentUser.role === 'admin';
-        const allTx = await DatabaseManager.getTransactions(isAdmin ? null : (currentUser._id || currentUser.id));
-        const allEmis = await DatabaseManager.getEMIs(isAdmin ? null : (currentUser._id || currentUser.id));
-        document.getElementById('stat-transactions-count').innerText = allTx.length;
-        document.getElementById('stat-emis-count').innerText = allEmis.length;
-        
-        // Show/Hide Users tab for non-admins
-        const usersBtn = document.getElementById('explorer-users-btn');
-        if (usersBtn) usersBtn.style.display = isAdmin ? 'block' : 'none';
-
-        if (!isAdmin && explorerTab === 'users') {
-            await switchExplorerTab('transactions');
-            return;
-        }
-        
-        // Check for local unsynced data
-        const localTxs = await DatabaseManager.getAllLocal('transactions');
-        const localEmis = await DatabaseManager.getAllLocal('emis');
-        const syncStatus = document.getElementById('sync-status');
-        if (localTxs.length > 0 || localEmis.length > 0) {
-            syncStatus.style.display = 'block';
-            syncStatus.innerText = `You have ${localTxs.length + localEmis.length} local records not yet synced to cloud.`;
-            syncStatus.style.color = 'var(--accent-primary)';
-        }
-        
-        await renderExplorer();
-    } catch (err) {
-        console.error("Stats Error:", err);
-    }
-}
-
-// Cloud Sync Button
-document.getElementById('btn-sync-cloud')?.addEventListener('click', async () => {
-    if (!currentUser) return;
-    const btn = document.getElementById('btn-sync-cloud');
-    const status = document.getElementById('sync-status');
-    
-    btn.disabled = true;
-    const originalContent = btn.innerHTML;
-    btn.innerHTML = '<i class="fa-solid fa-rotate fa-spin"></i> Syncing...';
-    status.style.display = 'block';
-    status.innerText = 'Uploading local data to cloud...';
-    status.style.color = 'var(--accent-primary)';
-
-    try {
-        await DatabaseManager.syncToCloud((currentUser._id || currentUser.id));
-        status.innerText = 'Sync complete! All data is now in the cloud.';
-        status.style.color = '#10b981';
-        await renderDatabaseStats();
-        if (currentUser) await renderUserDashboard();
-    } catch (err) {
-        status.innerText = 'Sync failed: ' + err.message + '. Ensure backend is running.';
-        status.style.color = '#ef4444';
-    } finally {
-        btn.disabled = false;
-        btn.innerHTML = originalContent;
-    }
-});
-
-document.getElementById('btn-export-db')?.addEventListener('click', async () => {
-    const data = {
-        users: await DatabaseManager.getUsers(),
-        transactions: await DatabaseManager.getTransactions(),
-        emis: await DatabaseManager.getEMIs(),
-        exportDate: new Date().toISOString(),
-        version: "1.0"
-    };
-    
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `hisab_backup_${new Date().toISOString().split('T')[0]}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-});
-
-document.getElementById('btn-import-db')?.addEventListener('click', () => {
-    const fileInput = document.getElementById('import-db-file');
-    const file = fileInput.files[0];
-    
-    if (!file) {
-        alert("Please select a backup file first.");
-        return;
-    }
-    
-    const reader = new FileReader();
-    reader.onload = async function(e) {
-        try {
-            const data = JSON.parse(e.target.result);
-            if (!data.transactions || !data.emis || !data.users) throw new Error("Invalid backup file format.");
-            
-            if (confirm("Importing this data will REPLACE all current data in IndexedDB. Are you sure?")) {
-                // Clear existing first
-                const users = await DatabaseManager.getUsers();
-                for (const u of users) await DatabaseManager.delete('users', u.id);
-                const txs = await DatabaseManager.getTransactions();
-                for (const t of txs) await DatabaseManager.delete('transactions', t.docId);
-                const emis = await DatabaseManager.getEMIs();
-                for (const e of emis) await DatabaseManager.delete('emis', e.docId);
-
-                // Add new
-                for (const u of data.users) await DatabaseManager.put('users', u);
-                for (const t of data.transactions) await DatabaseManager.put('transactions', t);
-                for (const em of data.emis) await DatabaseManager.put('emis', em);
-                
-                alert("Data imported successfully! The page will now reload.");
-                window.location.reload();
-            }
-        } catch (err) {
-            alert("Error importing data: " + err.message);
-        }
-    };
-    reader.readAsText(file);
-});
-
-document.getElementById('btn-factory-reset')?.addEventListener('click', () => {
-    if (confirm("CRITICAL WARNING: This will permanently delete ALL data, including your account and all transactions. This cannot be undone. Are you absolutely sure?")) {
-        const password = prompt("Please type 'RESET' to confirm factory reset:");
-        if (password === 'RESET') {
-            indexedDB.deleteDatabase('HisabDB');
-            localStorage.clear();
-            alert("Application has been reset. Reloading...");
-            window.location.reload();
-        } else {
-            alert("Reset cancelled.");
-        }
-    }
-});
-
-// ----------------------------------------------------
-// DATA EXPLORER LOGIC
-// ----------------------------------------------------
-let explorerTab = 'transactions';
-
-async function switchExplorerTab(tab) {
-    explorerTab = tab;
-    // Update active state of explorer buttons
-    const navButtons = document.querySelectorAll('.explorer-tabs .nav-btn');
-    navButtons.forEach(btn => {
-        if(btn.innerText.toLowerCase().includes(tab)) btn.classList.add('active');
-        else btn.classList.remove('active');
-    });
-    await renderExplorer();
-}
-
-async function renderExplorer() {
-    const thead = document.getElementById('explorer-thead');
-    const tbody = document.getElementById('explorer-tbody');
-    if(!thead || !tbody) return;
-
-    if (!currentUser) return;
-    const isAdmin = currentUser.role === 'admin';
-
-    let data = [];
-    let headers = [];
-
-    if (explorerTab === 'transactions') {
-        data = await DatabaseManager.getTransactions(isAdmin ? null : (currentUser._id || currentUser.id));
-        headers = ['Name', 'Amount', 'Type', 'Mode', 'Date', 'Actions'];
-    } else if (explorerTab === 'emis') {
-        data = await DatabaseManager.getEMIs(isAdmin ? null : (currentUser._id || currentUser.id));
-        headers = ['Label', 'Principal', 'Rate', 'Tenure', 'Actions'];
-    } else if (explorerTab === 'users' && isAdmin) {
-        data = await DatabaseManager.getUsers();
-        headers = ['Name', 'Email', 'Role', 'Actions'];
-    }
-
-    thead.innerHTML = headers.map(h => `<th>${h}</th>`).join('');
-    tbody.innerHTML = '';
-
-    data.forEach(item => {
-        const tr = document.createElement('tr');
-        if (explorerTab === 'transactions') {
-            tr.innerHTML = `
-                <td>${item.name}</td>
-                <td class="${item.type}">${formatMoney(item.amount)}</td>
-                <td><span class="badge-${item.type}">${item.type}</span></td>
-                <td>${item.mode}</td>
-                <td>${item.date}</td>
-                <td><button class="delete-btn" onclick="deleteExplorerItem('transactions', '${item.docId}')"><i class="fa-solid fa-trash"></i></button></td>
-            `;
-        } else if (explorerTab === 'emis') {
-            tr.innerHTML = `
-                <td>${item.label}</td>
-                <td>${formatMoney(item.principal)}</td>
-                <td>${item.interestRate}%</td>
-                <td>${item.tenure}m</td>
-                <td><button class="delete-btn" onclick="deleteExplorerItem('emis', '${item.docId}')"><i class="fa-solid fa-trash"></i></button></td>
-            `;
-        } else if (explorerTab === 'users') {
-            tr.innerHTML = `
-                <td>${item.name}</td>
-                <td>${item.email}</td>
-                <td>${item.role}</td>
-                <td>${item.role !== 'admin' ? `<button class="delete-btn" onclick="deleteExplorerItem('users', '${item.id}')"><i class="fa-solid fa-trash"></i></button>` : '-'}</td>
-            `;
-        }
-        tbody.appendChild(tr);
-    });
-}
-
-async function deleteExplorerItem(store, id) {
-    if (confirm(`Delete this ${store} record permanently?`)) {
-        if (store === 'transactions') await DatabaseManager.deleteTransaction(id);
-        else if (store === 'emis') await DatabaseManager.deleteEMI(id);
-        else if (store === 'users') await DatabaseManager.deleteUser(id);
-        await renderDatabaseStats(); // Will call renderExplorer
-        if (currentUser) await renderUserDashboard();
-    }
-}
-window.switchExplorerTab = switchExplorerTab; // Expose to HTML
-window.deleteExplorerItem = deleteExplorerItem;
-
 
 // ----------------------------------------------------
 // REPORTS DASHBOARD LOGIC
